@@ -22,7 +22,28 @@ call plug#begin('~/.config/nvim/autoload/')
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
     " HTML5 support
     Plug 'mattn/emmet-vim'
+    " wm keybindings for 
+    Plug 'fabi1cazenave/suckless.vim'  " vim-plug FTW
+    "Plug 'fabi1cazenave/termopen.vim'
 call plug#end()
+" binds for suckless.vim
+set splitbelow
+set splitright
+let g:suckless_tmap = 0 
+let g:suckless_mappings = {
+\    '<M-[df]>'         :   'SetTilingMode("[df]")'         ,
+\    '<M-[hjkl]>'       :   'SelectWindow("[hjkl]")'        ,
+\    '<M-[HJKL]>'       :   'MoveWindow("[hjkl]")'          ,
+\    '<C-M-[hjkl]>'     :   'ResizeWindow("[hjkl]")'        ,
+\    '<M-[oO]>'         :   'CreateWindow("[sv]")'          ,
+\    '<M-q>'            :   'CloseWindow()'                 ,
+\    '<M-[123456789]>'  :   'SelectTab([123456789])'        ,
+\    '<M-t>[123456789]' :   'MoveWindowToTab([123456789])'  ,
+\    '<M-T>[123456789]' :   'CopyWindowToTab([123456789])'  ,
+\}
+nmap <silent> <M-n> :call CreateWindow("v")<CR>:Ranger<CR>
+" binds for termopen
+"nmap <silent> <M-Return>    :call TermOpen()<CR>
 " override ranger keybindings
 let g:ranger_map_keys = 0
 let g:user_emmet_install_global = 0
@@ -59,7 +80,7 @@ nnoremap U <C-r>
 " create new line but stay in edit mode
 nnoremap O o<Esc>
 "Open terminal
-nnoremap <leader>t <Esc>:!<space>ls<Cr>:!<space>
+"nnoremap <leader>t <Esc>:!<space>ls<Cr>:!<space>
 " the jump to next tag and back commands
 nmap <silent> gd <Plug>(coc-definition) zz
 nmap <silent> gb <C-o>zz
