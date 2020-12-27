@@ -281,9 +281,9 @@ bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 1 -8% #d
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 1 toggle # mute sound
 
 # Sreen brightness controls
-bindsym XF86MonBrightnessUp exec "light -A 100; notify-send 'brightness up'"
+#bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl -q set +10%
 # increase screen brightness
-bindsym XF86MonBrightnessDown exec "light -U 100; notify-send 'brightness down'"
+#bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl -q set 10%-
 # decrease screen brightness
 
 # Media player controls

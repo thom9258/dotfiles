@@ -1,11 +1,14 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" sources for config settings
+" SOURCES FOR CONFIG SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-source $HOME/.config/nvim/nvim-config/coc.vim
-source $HOME/.config/nvim/monokai.vim
+"{{{
+source $HOME/.config/nvim/nvim-config/coc.vim"
+source $HOME/.config/nvim/monokai.vim"
+"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"vim plugin manager
+" VIM PLUGIN MANAGER
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{
 call plug#begin('~/.config/nvim/autoload/')
     " Buildin LSP support Maybe some other time.
     "Plug 'neovim/nvim-lspconfig'
@@ -26,9 +29,11 @@ call plug#begin('~/.config/nvim/autoload/')
     Plug 'fabi1cazenave/suckless.vim'  " vim-plug FTW
     "Plug 'fabi1cazenave/termopen.vim'
 call plug#end()
+"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " GENERAL SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{
 syntax on
 " force splits to go down and right
 set splitbelow
@@ -69,9 +74,11 @@ set statusline+=\ %F
 set statusline+=%= " set commands on right side
 set statusline+=\ %l/%L
 set statusline+=\ (%p%%)
+"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " KEYBINDINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{
 " leader
 let mapleader=" "
 " set custom suckless.vim keybindings
@@ -108,11 +115,13 @@ nnoremap U <C-r>
 " create new line but stay in edit mode
 nnoremap O o<ESC>
 " the jump to next tag and back commands
-nmap <SILENT> gd <Plug>(coc-definition) zz
-nmap <SILENT> gb <C-o>zz
+nnoremap <SILENT> gd <Plug>(coc-definition) zz
+nnoremap <SILENT> gb <C-o>zz
 " open ranger file manager
-nmap <SILENT> <M-n> :call CreateWindow("v")<CR>:Ranger<CR>
-map <M-Return> <ESC>:Ranger<CR>
+noremap <M-n> <ESC>:call CreateWindow("v")<CR>:Ranger<CR>
+noremap <M-Return> <ESC>:call CreateWindow("v")<CR>:terminal<CR>i
+" close terminal with escape
+tnoremap <Esc> <C-\><C-n>
 " closing brackets and parantheses
 inoremap { {}<ESC>i
 inoremap ( ()<ESC>i
@@ -122,9 +131,41 @@ inoremap <C-SPACE> <ESC>/(!)<CR>da(i
 nnoremap <C-SPACE> /(!)<CR>da(i
 " search and replace in entire file
 nnoremap <LEADER>s :%s///g<Left><Left><Left>
+" Force hjkl bindings
+"nnoremap <LEFT> <NOP>
+"nnoremap <RIGHT> <NOP>
+"nnoremap <UP> <NOP>
+"nnoremap <DOWN> <NOP>
+" stop command history from showing
+noremap q: :q
+"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"FILETYPE BINDINGS
+" FOLD SETTINGS AND BINDINGS (testing)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{
+" make sure to save and load views on enter leave
+autocmd BufWinLeave ?* mkview 1
+autocmd BufWinEnter ?* silent! loadview 1
+" save only fold and cursor info
+let &viewoptions="folds,cursor,unix"
+set viewdir=~/.nvim/viewdir
+" vim fold bindings
+set foldmethod=manual
+nnoremap za :setlocal<SPACE>foldmethod=marker<CR>za:setlocal<SPACE>foldmethod=manual<CR>zz
+autocmd FileType tex inoremap ;{{ %{{{FOLD
+autocmd FileType tex inoremap ;}} %}}}FOLD
+autocmd FileType tex nnoremap za :set<SPACE>foldmethod=marker<CR>:set<SPACE>foldmarker={{{FOLD,}}}FOLD<CR>za:set<SPACE>foldmethod=manual<CR>zz
+autocmd FileType vim inoremap ;{{ "{{{
+autocmd FileType vim inoremap ;}} "}}}
+autocmd FileType cpp,c,hpp inoremap ;{{ /*{{{*/<ESC>hi
+autocmd FileType cpp,c,hpp inoremap ;}} /*}}}*/
+autocmd FileType html inoremap ;{{ <!--{{{--><ESC>2hi
+autocmd FileType html inoremap ;}} <!--}}}-->
+"}}}
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" FILETYPE BINDINGS
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{
 " HTML-CSS
 autocmd FileType html,css EmmetInstall
 " VIM
@@ -196,6 +237,8 @@ autocmd Filetype cpp,c,hpp map <C-u> <ESC>$F/F/2x<ESC>$j
 "autocmd Filetype cpp,c,hpp nnoremap E <Plug>(coc-diagnostic-next)
 "autocmd FileType cpp,c,hpp set formatoptions=tcql
 " autocompletions
+"autocmd FileType cpp,c,hpp abbreviate #inc #include<SPACE>
+"autocmd FileType cpp,c,hpp abbreviate #def #define<SPACE>
 autocmd FileType cpp,c,hpp inoremap #i #include<SPACE>
 autocmd FileType cpp,c,hpp inoremap #d #define<SPACE>
 autocmd Filetype cpp,c,hpp inoremap " ""<ESC>i
@@ -214,4 +257,4 @@ autocmd Filetype py set smartindent
 " the jump to next tag command
 autocmd Filetype py inoremap " ""<ESC>i
 autocmd Filetype py inoremap ' ''<ESC>i
-" OTHER
+"}}}
