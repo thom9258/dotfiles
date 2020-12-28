@@ -81,6 +81,8 @@ set statusline+=\ (%p%%)
 "{{{
 " leader
 let mapleader=" "
+" leader key to space
+nnoremap <SPACE> <Nop>
 " set custom suckless.vim keybindings
 let g:suckless_tmap = 0 
 let g:suckless_mappings = {
@@ -97,15 +99,12 @@ let g:suckless_mappings = {
 " override ranger keybindings
 let g:ranger_map_keys = 0
 let g:user_emmet_install_global = 0
-""" leader key to space
-nnoremap <SPACE> <Nop>
-"" Control splits movement using CTRL hjkl
-nnoremap <C-h> <C-w><C-h>
-nnoremap <C-j> <C-w><C-j>
-nnoremap <C-k> <C-w><C-k>
-nnoremap <C-l> <C-w><C-l>
-"remap capital hjkl to move 10 characters in their respective direction
-"nnoremap H 10hzz
+" open ranger file manager
+noremap <M-n> <ESC>:call CreateWindow("v")<CR>:Ranger<CR>
+noremap <M-Return> <ESC>:call CreateWindow("s")<CR>:terminal<CR>i
+" close terminal with escape
+tnoremap <Esc> <C-\><C-n>
+" easier movement of large files
 nnoremap J 10jzz
 nnoremap K 10kzz
 " better word navigation with capitol w being back-one-word
@@ -117,11 +116,6 @@ nnoremap O o<ESC>
 " the jump to next tag and back commands
 nnoremap <SILENT> gd <Plug>(coc-definition) zz
 nnoremap <SILENT> gb <C-o>zz
-" open ranger file manager
-noremap <M-n> <ESC>:call CreateWindow("v")<CR>:Ranger<CR>
-noremap <M-Return> <ESC>:call CreateWindow("v")<CR>:terminal<CR>i
-" close terminal with escape
-tnoremap <Esc> <C-\><C-n>
 " closing brackets and parantheses
 inoremap { {}<ESC>i
 inoremap ( ()<ESC>i
