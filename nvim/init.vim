@@ -1,14 +1,11 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " SOURCES FOR CONFIG SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"{{{
 source $HOME/.config/nvim/nvim-config/coc.vim"
 source $HOME/.config/nvim/monokai.vim"
-"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " VIM PLUGIN MANAGER
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"{{{
 call plug#begin('~/.config/nvim/autoload/')
     " Buildin LSP support Maybe some other time.
     "Plug 'neovim/nvim-lspconfig'
@@ -29,15 +26,17 @@ call plug#begin('~/.config/nvim/autoload/')
     Plug 'fabi1cazenave/suckless.vim'  " vim-plug FTW
     "Plug 'fabi1cazenave/termopen.vim'
 call plug#end()
-"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " GENERAL SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"{{{
 syntax on
+" file encoding
+set encoding=utf-8
 " force splits to go down and right
 set splitbelow
 set splitright
+" force scroll when 4 lines away from border
+set scrolloff=4
 " error messages
 set noerrorbells
 " tab configuration
@@ -74,11 +73,9 @@ set statusline+=\ %F
 set statusline+=%= " set commands on right side
 set statusline+=\ %l/%L
 set statusline+=\ (%p%%)
-"}}}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " KEYBINDINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"{{{
 " leader
 let mapleader=" "
 " leader key to space
@@ -101,12 +98,15 @@ let g:ranger_map_keys = 0
 let g:user_emmet_install_global = 0
 " open ranger file manager
 noremap <M-n> <ESC>:call CreateWindow("v")<CR>:Ranger<CR>
-noremap <M-Return> <ESC>:call CreateWindow("s")<CR>:terminal<CR>i
+noremap <LEADER>f <ESC>:Ranger<CR>
+noremap <M-RETURN> <ESC>:call CreateWindow("s")<CR>:terminal<CR>i
 " close terminal with escape
-tnoremap <Esc> <C-\><C-n>
+tnoremap <ESC> <C-\><C-n>
 " easier movement of large files
 nnoremap J 10jzz
 nnoremap K 10kzz
+vnoremap J 10jzz
+vnoremap K 10kzz
 " better word navigation with capitol w being back-one-word
 nnoremap W b
 " better undo redo by using capital u for redo
@@ -132,34 +132,39 @@ nnoremap <LEADER>s :%s///g<Left><Left><Left>
 "nnoremap <DOWN> <NOP>
 " stop command history from showing
 noremap q: :q
-"}}}
+" indent and outdent with tab (note it an be combined with amount like (4<TAB>))
+vnoremap <TAB> >><ESC>
+vnoremap <S-TAB> <<<ESC>
+nnoremap <TAB> >><ESC>
+nnoremap <S-TAB> <<<ESC>
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " FOLD SETTINGS AND BINDINGS (testing)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"{{{
 " make sure to save and load views on enter leave
-autocmd BufWinLeave ?* mkview 1
-autocmd BufWinEnter ?* silent! loadview 1
+"autocmd BufWinLeave ?* mkview 1
+"autocmd BufWinEnter ?* silent! loadview 1
 " save only fold and cursor info
-let &viewoptions="folds,cursor,unix"
-set viewdir=~/.nvim/viewdir
+"let &viewoptions="folds,cursor,unix"
+"set viewdir=~/.nvim/viewdir
 " vim fold bindings
-set foldmethod=manual
-nnoremap za :setlocal<SPACE>foldmethod=marker<CR>za:setlocal<SPACE>foldmethod=manual<CR>zz
-autocmd FileType tex inoremap ;{{ %{{{FOLD
-autocmd FileType tex inoremap ;}} %}}}FOLD
-autocmd FileType tex nnoremap za :set<SPACE>foldmethod=marker<CR>:set<SPACE>foldmarker={{{FOLD,}}}FOLD<CR>za:set<SPACE>foldmethod=manual<CR>zz
-autocmd FileType vim inoremap ;{{ "{{{
-autocmd FileType vim inoremap ;}} "}}}
-autocmd FileType cpp,c,hpp inoremap ;{{ /*{{{*/<ESC>hi
-autocmd FileType cpp,c,hpp inoremap ;}} /*}}}*/
-autocmd FileType html inoremap ;{{ <!--{{{--><ESC>2hi
-autocmd FileType html inoremap ;}} <!--}}}-->
-"}}}
+"set foldmethod=manual
+"autocmd InsertLeave,WinEnter * setlocal foldmethod=marker
+"autocmd InsertEnter,WinLeave * setlocal foldmethod=manual
+"set foldmethod=marker
+"set foldnestmax=3
+"nnoremap za :setlocal<SPACE>foldmethod=marker<CR>za:setlocal<SPACE>foldmethod=manual<CR>zz
+"autocmd FileType tex inoremap ;{{ %{{{FOLD
+"autocmd FileType tex inoremap ;}} %}}}FOLD
+"autocmd FileType tex nnoremap za :set<SPACE>foldmethod=marker<CR>:set<SPACE>foldmarker={{{FOLD,}}}FOLD<CR>za:set<SPACE>foldmethod=manual<CR>zz
+"autocmd FileType vim inoremap ;{{ "{{{
+"autocmd FileType vim inoremap ;}} "}}}
+"autocmd FileType cpp,c,hpp inoremap ;{{ /*{{{*/<ESC>hi
+"autocmd FileType cpp,c,hpp inoremap ;}} /*}}}*/
+"autocmd FileType html inoremap ;{{ <!--{{{--><ESC>2hi
+"autocmd FileType html inoremap ;}} <!--}}}-->
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " FILETYPE BINDINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"{{{
 " HTML-CSS
 autocmd FileType html,css EmmetInstall
 " VIM
@@ -251,4 +256,3 @@ autocmd Filetype py set smartindent
 " the jump to next tag command
 autocmd Filetype py inoremap " ""<ESC>i
 autocmd Filetype py inoremap ' ''<ESC>i
-"}}}
