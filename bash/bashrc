@@ -111,6 +111,11 @@ if ! shopt -oq posix; then
   fi
 fi
 
+alias mv='mv -i'
+alias rm='rm -i'
+alias c='clear'
+alias clc='clear'
+alias cll='clear; ls --group-directories-first --color=always'
 alias ll='ls -AlgGh --group-directories-first --color=always'
 alias la='ls -a --group-directories-first --color=always'
 alias ls='ls --group-directories-first --color=always'
@@ -126,15 +131,17 @@ alias fuzzylite='~/Documents/Cpp/lib/fuzzylite-6.0/release/bin/fuzzylite'
 alias 5sem='. 5sem'
 alias 6sem='. 6sem'
 alias v='nvim'
-alias view='. view'
 alias mark='. jumpmark.sh && mark'
 alias jmp='. jumpmark.sh && jmp'
 alias listmark='. jumpmark.sh && listmark'
+alias za='zathura'
+alias matlab='matlab &'
 
 PATH=$PATH:~/Documents/bash/
 PATH=$PATH:~/Documents/bash/jumpmark/
 
 # The bash greeter shows    \j = amount of jobs running
 #                           \w = path to current directory
-#PS1="[\j]\e[0;32m\]\w~>\e[m\]"
-PS1="[\j] \w ~> "
+#                           using green and write
+#PS1="[\j] \w ~> "
+PS1='[\j]\[\033[1;32m\]\w >\[\033[00m\] '

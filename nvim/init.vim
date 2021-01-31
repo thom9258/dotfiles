@@ -1,4 +1,4 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " SOURCES FOR CONFIG SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 source $HOME/.config/nvim/nvim-config/coc.vim"
@@ -32,11 +32,13 @@ call plug#end()
 syntax on
 " file encoding
 set encoding=utf-8
+" keeps buffers open
+set hidden
 " force splits to go down and right
 set splitbelow
 set splitright
 " force scroll when 4 lines away from border
-set scrolloff=4
+set scrolloff=8
 " error messages
 set noerrorbells
 " tab configuration
@@ -54,6 +56,7 @@ set autoindent " copies the indentation of the previous line
 set smartcase
 set ignorecase
 set incsearch
+"set nohlsearch
 " memory management
 set noswapfile
 " use external backup script on save 
@@ -103,12 +106,13 @@ noremap <M-RETURN> <ESC>:call CreateWindow("s")<CR>:terminal<CR>i
 " close terminal with escape
 tnoremap <ESC> <C-\><C-n>
 " easier movement of large files
-nnoremap J 10jzz
-nnoremap K 10kzz
-vnoremap J 10jzz
-vnoremap K 10kzz
+nnoremap J 10j
+nnoremap K 10k
+vnoremap J 10j
+vnoremap K 10k
 " better word navigation with capitol w being back-one-word
 nnoremap W b
+vnoremap W b
 " better undo redo by using capital u for redo
 nnoremap U <C-r>
 " create new line but stay in edit mode
@@ -168,16 +172,17 @@ nnoremap <S-TAB> <<<ESC>
 " HTML-CSS
 autocmd FileType html,css EmmetInstall
 " VIM
-autocmd Filetype vim map <LEADER>b <ESC>:source<SPACE>%<CR>
+autocmd Filetype vim noremap <LEADER>b <ESC>:source<SPACE>~/.config/nvim/init.vim<CR>
 " TEX
 " Filetype recognition for latex
 let g:tex_flavor = "latex"
-autocmd Filetype tex set relativenumber
+autocmd Filetype tex setlocal relativenumber
 " the jump to next tag command
 " Spell-checking (note ! means to toggle)
 autocmd Filetype tex nnoremap <LEADER>r <ESC>:set spell!
 " check misspelled word corrections
 autocmd Filetype tex nnoremap <LEADER>a z=
+" convert tex document to pdf
 autocmd Filetype tex nnoremap <LEADER>b <ESC>:!pdf<SPACE>%<CR>
 " closing brackets and parentheses
 autocmd FileType tex inoremap $ $$<ESC>i
@@ -201,9 +206,9 @@ autocmd Filetype tex inoremap ;ma \[<CR><CR>\]<CR>(!)<ESC>2ki
 autocmd Filetype tex inoremap ;code \begin{verbatim}<CR><CR>\end{verbatim}<CR><CR>(!)<ESC>3ki
 autocmd Filetype tex inoremap ;verb \verb!!<SPACE>(!)<ESC>4hi
 autocmd Filetype tex inoremap ;ref \href{}{(!)}<SPACE>(!)<ESC>F{F{a
+autocmd Filetype tex inoremap ;e \explanation{}{(!)}<CR><CR>(!)<ESC>2k0f{a
 "autocmd Filetype tex inoremap ;nl <CR>\newline<CR>
 "autocmd Filetype tex inoremap ;ns <CR>\newline<SPACE>\newline<CR>
-autocmd Filetype tex inoremap ;e \explanation{}{(!)}<CR><CR>(!)<ESC>2k0f{a
 " Math auto-completions
 autocmd Filetype tex inoremap :tab \begin{figure}[H]<CR>\begin{tabular}{lll}<CR><CR>\end{tabular}<CR>\end{figure}<ESC>2ki
 autocmd Filetype tex inoremap :frac \frac{}{(!)}<SPACE>(!)<ESC>F}F}i
@@ -218,19 +223,26 @@ autocmd Filetype tex inoremap :geq \geq<SPACE>
 autocmd Filetype tex inoremap := \equiv<SPACE>
 autocmd Filetype tex inoremap :righta \rightarrow<SPACE>
 autocmd Filetype tex inoremap :lefta \leftarrow<SPACE>
+" Beamer presentations (should be 2 or more characters to not fuck up latex _
+" in math)
+autocmd Filetype tex inoremap __f \begin{frame}<CR>\frametitle{}<CR>(!)<CR>\end{frame}<CR><CR>(!)<ESC>4kf{a
+autocmd Filetype tex inoremap __p \pause
+autocmd Filetype tex inoremap __c \begin{columns}<CR>\column{.4\textwidth}<CR><CR>\column{.6\textwidth}<CR>(!)<CR>\end{columns}<ESC>3ki
+autocmd Filetype tex inoremap __i \includegraphics[width=1\textwidth]{}<CR>(!)<ESC>kf{a
+
 " CPP
 " settings for c related files only
-autocmd Filetype cpp,c,hpp set tabstop=2 softtabstop=2
-autocmd Filetype cpp,c,hpp set shiftwidth=2
-autocmd Filetype cpp,c,hpp set expandtab
-autocmd Filetype cpp,c,hpp set smartindent
-autocmd FileType cpp,c,hpp set cindent
-autocmd Filetype cpp,c,hpp set colorcolumn=81
-autocmd Filetype cpp,c,hpp map <LEADER>r <ESC>:!<SPACE>ls<CR>:!<SPACE>./
-autocmd Filetype cpp,c,hpp map <LEADER>b <ESC>:!<SPACE>ls<CR>:!<SPACE>make<SPACE>clean<SPACE>;<SPACE>make<SPACE>
+autocmd Filetype cpp,c,hpp setlocal tabstop=2 softtabstop=2
+autocmd Filetype cpp,c,hpp setlocal shiftwidth=2
+autocmd Filetype cpp,c,hpp setlocal expandtab
+autocmd Filetype cpp,c,hpp setlocal smartindent
+autocmd FileType cpp,c,hpp setlocal cindent
+autocmd Filetype cpp,c,hpp setlocal colorcolumn=81
+autocmd Filetype cpp,c,hpp noremap <LEADER>r <ESC>:!<SPACE>ls<CR>:!<SPACE>./
+autocmd Filetype cpp,c,hpp noremap <LEADER>b <ESC>:!<SPACE>ls<CR>:!<SPACE>make<SPACE>clean<SPACE>;<SPACE>make<SPACE>
 " comment and uncomment commands
-autocmd Filetype cpp,c,hpp map <C-k> <ESC>0i//<ESC>$j
-autocmd Filetype cpp,c,hpp map <C-u> <ESC>$F/F/2x<ESC>$j
+autocmd Filetype cpp,c,hpp noremap <C-k> <ESC>0i//<ESC>$j
+autocmd Filetype cpp,c,hpp noremap <C-u> <ESC>$F/F/2x<ESC>$j
 " Jump through coc-errors
 "autocmd Filetype cpp,c,hpp nnoremap e <Plug>(coc-diagnostic-prev)
 "autocmd Filetype cpp,c,hpp nnoremap E <Plug>(coc-diagnostic-next)
