@@ -37,7 +37,7 @@ set hidden
 " force splits to go down and right
 set splitbelow
 set splitright
-" force scroll when 4 lines away from border
+" force scroll when X lines away from border
 set scrolloff=8
 " error messages
 set noerrorbells
@@ -172,63 +172,62 @@ nnoremap <S-TAB> <<<ESC>
 " HTML-CSS
 autocmd FileType html,css EmmetInstall
 " VIM
-autocmd Filetype vim noremap <LEADER>b <ESC>:source<SPACE>~/.config/nvim/init.vim<CR>
+autocmd Filetype vim noremap <buffer> <LEADER>b <ESC>:source<SPACE>~/.config/nvim/init.vim<CR>
 " TEX
 " Filetype recognition for latex
 let g:tex_flavor = "latex"
 autocmd Filetype tex setlocal relativenumber
 " the jump to next tag command
 " Spell-checking (note ! means to toggle)
-autocmd Filetype tex nnoremap <LEADER>r <ESC>:set spell!
+autocmd Filetype tex nnoremap <buffer> <F1> :set spell!<CR>
 " check misspelled word corrections
-autocmd Filetype tex nnoremap <LEADER>a z=
+autocmd Filetype tex nnoremap <buffer> <LEADER>a z=
 " convert tex document to pdf
-autocmd Filetype tex nnoremap <LEADER>b <ESC>:!pdf<SPACE>%<CR>
+autocmd Filetype tex nnoremap <buffer> <LEADER>b <ESC>:!pdf<SPACE>%<CR>
 " closing brackets and parentheses
-autocmd FileType tex inoremap $ $$<ESC>i
-autocmd Filetype tex inoremap " ""<ESC>i
+autocmd FileType tex inoremap <buffer> $ $$<ESC>i
+autocmd Filetype tex inoremap <buffer> " ""<ESC>i
 " go to center of where you want to go to insert mode
-autocmd FileType tex nnoremap i zzi
-autocmd FileType tex nnoremap a zza
-autocmd FileType tex nnoremap o zzo
+autocmd FileType tex nnoremap <buffer> i zzi
+autocmd FileType tex nnoremap <buffer> a zza
+autocmd FileType tex nnoremap <buffer> o zzo
 " auto-completions
-autocmd FileType tex inoremap ;bf \textbf{}<SPACE>(!)<ESC>T{i
-autocmd FileType tex inoremap ;t \textit{}<SPACE>(!)<ESC>T{i
-autocmd FileType tex inoremap ;li \begin{enumerate}<CR><CR>\end{enumerate}<CR><CR>(!)<ESC>3kA\item<SPACE>
-autocmd FileType tex inoremap ;ul \begin{itemize}<CR><CR>\end{itemize}<CR><CR>(!)<ESC>3kA\item<SPACE>
-autocmd Filetype tex inoremap ;i \includegraphics[width=0.8\textwidth]{}<CR><CR>(!)<ESC>2kf}i
-autocmd Filetype tex inoremap ;I \includegraphics[width=0.8\textwidth]{}<CR><CR>(!)<ESC>2kf}i
-autocmd Filetype tex inoremap ;1s \section*{}<CR><CR>(!)<ESC>2kf}i
-autocmd Filetype tex inoremap ;2s \subsection*{}<CR><CR>(!)<ESC>2kf}i
-autocmd Filetype tex inoremap ;3s \subsubsection*{}<CR><CR>(!)<ESC>2kf}i
-autocmd Filetype tex inoremap ;np \newpage<CR><CR>
-autocmd Filetype tex inoremap ;ma \[<CR><CR>\]<CR>(!)<ESC>2ki
-autocmd Filetype tex inoremap ;code \begin{verbatim}<CR><CR>\end{verbatim}<CR><CR>(!)<ESC>3ki
-autocmd Filetype tex inoremap ;verb \verb!!<SPACE>(!)<ESC>4hi
-autocmd Filetype tex inoremap ;ref \href{}{(!)}<SPACE>(!)<ESC>F{F{a
-autocmd Filetype tex inoremap ;e \explanation{}{(!)}<CR><CR>(!)<ESC>2k0f{a
-"autocmd Filetype tex inoremap ;nl <CR>\newline<CR>
-"autocmd Filetype tex inoremap ;ns <CR>\newline<SPACE>\newline<CR>
+autocmd FileType tex inoremap <buffer> ;bf \textbf{}<SPACE>(!)<ESC>T{i
+autocmd FileType tex inoremap <buffer> ;t  \textit{}<SPACE>(!)<ESC>T{i
+autocmd FileType tex inoremap <buffer> ;li \begin{enumerate}<CR><CR>\end{enumerate}<CR><CR>(!)<ESC>3kA\item<SPACE>
+autocmd FileType tex inoremap <buffer> ;ul \begin{itemize}<CR><CR>\end{itemize}<CR><CR>(!)<ESC>3kA\item<SPACE>
+autocmd Filetype tex inoremap <buffer> ;i \includegraphics[width=0.8\textwidth]{}<CR><CR>(!)<ESC>2kf}i
+autocmd Filetype tex inoremap <buffer> ;I \includegraphics[width=0.8\textwidth]{}<CR><CR>(!)<ESC>2kf}i
+autocmd Filetype tex inoremap <buffer> ;1s \section*{}<CR><CR>(!)<ESC>2kf}i
+autocmd Filetype tex inoremap <buffer> ;2s \subsection*{}<CR><CR>(!)<ESC>2kf}i
+autocmd Filetype tex inoremap <buffer> ;3s \subsubsection*{}<CR><CR>(!)<ESC>2kf}i
+autocmd Filetype tex inoremap <buffer> ;np \newpage<CR><CR>
+autocmd Filetype tex inoremap <buffer> ;ma \[<CR><CR>\]<CR>(!)<ESC>2ki
+autocmd Filetype tex inoremap <buffer> ;code \begin{verbatim}<CR><CR>\end{verbatim}<CR><CR>(!)<ESC>3ki
+autocmd Filetype tex inoremap <buffer> ;verb \verb!!<SPACE>(!)<ESC>4hi
+autocmd Filetype tex inoremap <buffer> ;ref \href{}{(!)}<SPACE>(!)<ESC>F{F{a
+autocmd Filetype tex inoremap <buffer> ;e \explanation{}{(!)}<CR><CR>(!)<ESC>2k0f{a
+"autocmd Filetype tex inoremap <buffer> ;nl <CR>\newline<CR>
+"autocmd Filetype tex inoremap <buffer> ;ns <CR>\newline<SPACE>\newline<CR>
 " Math auto-completions
-autocmd Filetype tex inoremap :tab \begin{figure}[H]<CR>\begin{tabular}{lll}<CR><CR>\end{tabular}<CR>\end{figure}<ESC>2ki
-autocmd Filetype tex inoremap :frac \frac{}{(!)}<SPACE>(!)<ESC>F}F}i
-autocmd Filetype tex inoremap :sum \sum_{}^{(!)}<SPACE>(!)<ESC>F}F}i
-autocmd Filetype tex inoremap :int \int_{}^{(!)}<SPACE>d(!)<ESC>F}F}i
-autocmd Filetype tex inoremap :lim \lim_{}<SPACE>(!)<ESC>F}i
-autocmd Filetype tex inoremap :sqr \sqrt{}<SPACE>(!)<ESC>F}i
-autocmd Filetype tex inoremap :ma \[<CR><CR>\]<CR>(!)<ESC>2ki
-autocmd Filetype tex inoremap :bma \begin{bmatrix}<CR><CR>\end{bmatrix}<CR>(!)<ESC>2ki
-autocmd Filetype tex inoremap :leq \leq<SPACE>
-autocmd Filetype tex inoremap :geq \geq<SPACE>
-autocmd Filetype tex inoremap := \equiv<SPACE>
-autocmd Filetype tex inoremap :righta \rightarrow<SPACE>
-autocmd Filetype tex inoremap :lefta \leftarrow<SPACE>
-" Beamer presentations (should be 2 or more characters to not fuck up latex _
-" in math)
-autocmd Filetype tex inoremap __f \begin{frame}<CR>\frametitle{}<CR>(!)<CR>\end{frame}<CR><CR>(!)<ESC>4kf{a
-autocmd Filetype tex inoremap __p \pause
-autocmd Filetype tex inoremap __c \begin{columns}<CR>\column{.4\textwidth}<CR><CR>\column{.6\textwidth}<CR>(!)<CR>\end{columns}<ESC>3ki
-autocmd Filetype tex inoremap __i \includegraphics[width=1\textwidth]{}<CR>(!)<ESC>kf{a
+autocmd Filetype tex inoremap <buffer> :tab \begin{figure}[H]<CR>\begin{tabular}{lll}<CR><CR>\end{tabular}<CR>\end{figure}<ESC>2ki
+autocmd Filetype tex inoremap <buffer> :frac \frac{}{(!)}<SPACE>(!)<ESC>F}F}i
+autocmd Filetype tex inoremap <buffer> :sum \sum_{}^{(!)}<SPACE>(!)<ESC>F}F}i
+autocmd Filetype tex inoremap <buffer> :int \int_{}^{(!)}<SPACE>d(!)<ESC>F}F}i
+autocmd Filetype tex inoremap <buffer> :lim \lim_{}<SPACE>(!)<ESC>F}i
+autocmd Filetype tex inoremap <buffer> :sqr \sqrt{}<SPACE>(!)<ESC>F}i
+autocmd Filetype tex inoremap <buffer> :ma \[<CR><CR>\]<CR>(!)<ESC>2ki
+autocmd Filetype tex inoremap <buffer> :bma \begin{bmatrix}<CR><CR>\end{bmatrix}<CR>(!)<ESC>2ki
+autocmd Filetype tex inoremap <buffer> :leq \leq<SPACE>
+autocmd Filetype tex inoremap <buffer> :geq \geq<SPACE>
+autocmd Filetype tex inoremap <buffer> := \equiv<SPACE>
+autocmd Filetype tex inoremap <buffer> :righta \rightarrow<SPACE>
+autocmd Filetype tex inoremap <buffer> :lefta \leftarrow<SPACE>
+" Beamer presentations
+autocmd Filetype tex inoremap <buffer> __f \begin{frame}<CR>\frametitle{}<CR>(!)<CR>\end{frame}<CR><CR>(!)<ESC>4kf{a
+autocmd Filetype tex inoremap <buffer> __p \pause
+autocmd Filetype tex inoremap <buffer> __c \begin{columns}<CR>\column{.4\textwidth}<CR><CR>\column{.6\textwidth}<CR>(!)<CR>\end{columns}<ESC>3ki
+autocmd Filetype tex inoremap <buffer> __i \includegraphics[width=1\textwidth]{}<CR>(!)<ESC>kf{a
 
 " CPP
 " settings for c related files only
@@ -238,33 +237,33 @@ autocmd Filetype cpp,c,hpp setlocal expandtab
 autocmd Filetype cpp,c,hpp setlocal smartindent
 autocmd FileType cpp,c,hpp setlocal cindent
 autocmd Filetype cpp,c,hpp setlocal colorcolumn=81
-autocmd Filetype cpp,c,hpp noremap <LEADER>r <ESC>:!<SPACE>ls<CR>:!<SPACE>./
-autocmd Filetype cpp,c,hpp noremap <LEADER>b <ESC>:!<SPACE>ls<CR>:!<SPACE>make<SPACE>clean<SPACE>;<SPACE>make<SPACE>
+autocmd Filetype cpp,c,hpp noremap <buffer> <LEADER>r <ESC>:!<SPACE>ls<CR>:!<SPACE>./
+autocmd Filetype cpp,c,hpp noremap <buffer> <LEADER>b <ESC>:!<SPACE>ls<CR>:!<SPACE>make<SPACE>clean<SPACE>;<SPACE>make<SPACE>
 " comment and uncomment commands
-autocmd Filetype cpp,c,hpp noremap <C-k> <ESC>0i//<ESC>$j
-autocmd Filetype cpp,c,hpp noremap <C-u> <ESC>$F/F/2x<ESC>$j
+autocmd Filetype cpp,c,hpp noremap <buffer> <C-k> <ESC>0i//<ESC>$j
+autocmd Filetype cpp,c,hpp noremap <buffer> <C-u> <ESC>$F/F/2x<ESC>$j
 " Jump through coc-errors
-"autocmd Filetype cpp,c,hpp nnoremap e <Plug>(coc-diagnostic-prev)
-"autocmd Filetype cpp,c,hpp nnoremap E <Plug>(coc-diagnostic-next)
+"autocmd Filetype cpp,c,hpp nnoremap <buffer> e <Plug>(coc-diagnostic-prev)
+"autocmd Filetype cpp,c,hpp nnoremap <buffer> E <Plug>(coc-diagnostic-next)
 "autocmd FileType cpp,c,hpp set formatoptions=tcql
 " autocompletions
 "autocmd FileType cpp,c,hpp abbreviate #inc #include<SPACE>
 "autocmd FileType cpp,c,hpp abbreviate #def #define<SPACE>
-autocmd FileType cpp,c,hpp inoremap #i #include<SPACE>
-autocmd FileType cpp,c,hpp inoremap #d #define<SPACE>
-autocmd Filetype cpp,c,hpp inoremap " ""<ESC>i
-autocmd Filetype cpp,c,hpp inoremap ' ''<ESC>i
-autocmd FileType cpp,hpp inoremap ;thow throw<SPACE>runtime_error("");<CR>(!)<ESC>k0f"a
-autocmd FileType cpp,hpp inoremap ;try try<CR>{<CR><CR>}<CR>catch(<SPACE>runtime_error&<SPACE>e<SPACE>)<CR>{<CR>(!)<CR>}<CR>(!)<ESC>6ki<Tab>
-autocmd FileType cpp,hpp inoremap ;for for(){<CR>(!)<CR>}<ESC>2kf)i
-autocmd FileType cpp,hpp inoremap ;com /**/<ESC>hi
-autocmd FileType cpp,hpp inoremap ;stream osfstream<SPACE>o;<CR>o.open("");<ESC>F"i
-autocmd FileType cpp,hpp inoremap ;out std::cout<SPACE><<<SPACE><SPACE><<<SPACE>std::endl;<ESC>F<SPACE>F<SPACE>i
-autocmd FileType cpp,hpp inoremap ;class class<SPACE>{<CR>public:<CR>(!)<CR>}<ESC>3kf{i
-autocmd FileType cpp,hpp inoremap ;db if(_debug){<CR><CR>}<ESC>kistd::cout<SPACE><<<SPACE>
+autocmd FileType cpp,c,hpp inoremap <buffer> #i #include<SPACE>
+autocmd FileType cpp,c,hpp inoremap <buffer> #d #define<SPACE>
+autocmd Filetype cpp,c,hpp inoremap <buffer> " ""<ESC>i
+autocmd Filetype cpp,c,hpp inoremap <buffer> ' ''<ESC>i
+autocmd FileType cpp,hpp inoremap <buffer> ;thow throw<SPACE>runtime_error("");<CR>(!)<ESC>k0f"a
+autocmd FileType cpp,hpp inoremap <buffer> ;try try<CR>{<CR><CR>}<CR>catch(<SPACE>runtime_error&<SPACE>e<SPACE>)<CR>{<CR>(!)<CR>}<CR>(!)<ESC>6ki<Tab>
+autocmd FileType cpp,hpp inoremap <buffer> ;for for(){<CR>(!)<CR>}<ESC>2kf)i
+autocmd FileType cpp,hpp inoremap <buffer> ;com /**/<ESC>hi
+autocmd FileType cpp,hpp inoremap <buffer> ;stream osfstream<SPACE>o;<CR>o.open("");<ESC>F"i
+autocmd FileType cpp,hpp inoremap <buffer> ;out std::cout<SPACE><<<SPACE><SPACE><<<SPACE>std::endl;<ESC>F<SPACE>F<SPACE>i
+autocmd FileType cpp,hpp inoremap <buffer> ;class class<SPACE>{<CR>public:<CR>(!)<CR>}<ESC>3kf{i
+autocmd FileType cpp,hpp inoremap <buffer> ;db if(_debug){<CR><CR>}<ESC>kistd::cout<SPACE><<<SPACE>
 " PY 
 " settings for py related files only
 autocmd Filetype py set smartindent
 " the jump to next tag command
-autocmd Filetype py inoremap " ""<ESC>i
-autocmd Filetype py inoremap ' ''<ESC>i
+autocmd Filetype py inoremap <buffer> " ""<ESC>i
+autocmd Filetype py inoremap <buffer> ' ''<ESC>i
