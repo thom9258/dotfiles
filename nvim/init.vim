@@ -7,24 +7,25 @@ source $HOME/.config/nvim/monokai.vim"
 " VIM PLUGIN MANAGER
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.config/nvim/autoload/')
-    " Buildin LSP support Maybe some other time.
-    "Plug 'neovim/nvim-lspconfig'
-    "Plug 'nvim-lua/completion-nvim'
     " Better Syntax Support
     Plug 'sheerun/vim-polyglot'
     " File Explorer
-    "Plug 'vifm/vifm.vim'
     Plug 'francoiscabrol/ranger.vim'
-    Plug 'rbgrouleff/bclose.vim'
     "latex
     Plug 'lervag/vimtex'    
     "Intellisence, including LSP(Languange server protocol) autocomplete mm.
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
     " HTML5 support
     Plug 'mattn/emmet-vim'
-    " wm keybindings for 
-    Plug 'fabi1cazenave/suckless.vim'  " vim-plug FTW
+    " wm keybindings
+    Plug 'fabi1cazenave/suckless.vim'
+    " PLUGS I DONT USE ANYMORE
     "Plug 'fabi1cazenave/termopen.vim'
+    "Plug 'rbgrouleff/bclose.vim'
+    "Plug 'vifm/vifm.vim'
+    " Buildin LSP support Maybe some other time.
+    "Plug 'neovim/nvim-lspconfig'
+    "Plug 'nvim-lua/completion-nvim'
 call plug#end()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " GENERAL SETTINGS
@@ -69,19 +70,30 @@ set undofile
 set clipboard+=unnamedplus
 " colorcolumn for line break visual
 highlight ColorColumn term=NONE cterm=NONE ctermbg=black guibg=Grey40
-" Status line
+" Status line 
+" Contains:
+" (blank)   Disaples status commands created by plugins 
+" M         Unsaved modifications
+" <         where to truncate status line if it is too long
+" F         total path to file in buffer
+" =         allign to right side
+" l/L       current line / total lines
+" c         current column
+" p         current line in percentage
 set statusline=
 set statusline+=\ [%M]
+set statusline+=\ %<
 set statusline+=\ %F
-set statusline+=%= " set commands on right side
+set statusline+=\ %=
 set statusline+=\ %l/%L
+set statusline+=\ ,%c
 set statusline+=\ (%p%%)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " KEYBINDINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " leader
 let mapleader=" "
-" leader key to space
+" remove normal space behavior in favor of leader behavior
 nnoremap <SPACE> <Nop>
 " set custom suckless.vim keybindings
 let g:suckless_tmap = 0 
@@ -130,15 +142,15 @@ nnoremap <C-SPACE> /(!)<CR>da(i
 " search and replace in entire file
 nnoremap <LEADER>s :%s///g<Left><Left><Left>
 " Force hjkl bindings
-"nnoremap <LEFT> <NOP>
-"nnoremap <RIGHT> <NOP>
-"nnoremap <UP> <NOP>
-"nnoremap <DOWN> <NOP>
+nnoremap <LEFT> <NOP>
+nnoremap <RIGHT> <NOP>
+nnoremap <UP> <NOP>
+nnoremap <DOWN> <NOP>
 " stop command history from showing
 noremap q: :q
 " indent and outdent with tab (note it an be combined with amount like (4<TAB>))
-vnoremap <TAB> >><ESC>
-vnoremap <S-TAB> <<<ESC>
+vnoremap <TAB> >><ESC>gv
+vnoremap <S-TAB> <<<ESC>gv
 nnoremap <TAB> >><ESC>
 nnoremap <S-TAB> <<<ESC>
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
