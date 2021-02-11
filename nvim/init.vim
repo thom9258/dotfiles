@@ -126,6 +126,9 @@ vnoremap K 10k
 " better word navigation with capitol w being back-one-word
 nnoremap W b
 vnoremap W b
+" end-of-word navigation with capitol e for going back to end of previous word
+nnoremap E ge
+vnoremap E ge
 " better undo redo by using capital u for redo
 nnoremap U <C-r>
 " create new line but stay in edit mode
