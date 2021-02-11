@@ -70,8 +70,9 @@ set undofile
 set clipboard+=unnamedplus
 " colorcolumn for line break visual
 highlight ColorColumn term=NONE cterm=NONE ctermbg=black guibg=Grey40
-" Status line 
-" Contains:
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" STATUS LINE
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " (blank)   Disaples status commands created by plugins 
 " M         Unsaved modifications
 " <         where to truncate status line if it is too long
