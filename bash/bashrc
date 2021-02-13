@@ -136,7 +136,7 @@ alias jmp='. jumpmark.sh && jmp'
 alias listmark='. jumpmark.sh && listmark'
 alias za='zathura'
 alias matlab='matlab &'
-
+alias cal='ncal -3w'
 PATH=$PATH:~/Documents/bash/
 PATH=$PATH:~/Documents/bash/jumpmark/
 

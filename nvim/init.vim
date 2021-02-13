@@ -7,18 +7,19 @@ source $HOME/.config/nvim/monokai.vim"
 " VIM PLUGIN MANAGER
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.config/nvim/autoload/')
-    " Better Syntax Support
-    Plug 'sheerun/vim-polyglot'
-    " File Explorer
-    Plug 'francoiscabrol/ranger.vim'
-    "latex
-    Plug 'lervag/vimtex'    
     "Intellisence, including LSP(Languange server protocol) autocomplete mm.
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    " Better Syntax Support
+    Plug 'sheerun/vim-polyglot'
+    "latex
+    Plug 'lervag/vimtex'    
     " HTML5 support
     Plug 'mattn/emmet-vim'
+    " File Explorer
+    Plug 'francoiscabrol/ranger.vim'
     " wm keybindings
     Plug 'fabi1cazenave/suckless.vim'
+
     " PLUGS I DONT USE ANYMORE
     "Plug 'fabi1cazenave/termopen.vim'
     "Plug 'rbgrouleff/bclose.vim'
@@ -51,14 +52,18 @@ set number
 set mouse=a
 set cursorline
 highlight Cursorline term=NONE cterm=NONE ctermbg=black guibg=Grey40
-"indentation
-set autoindent " copies the indentation of the previous line
+"indentation copies the indentation of the previous line
+set autoindent
 " searching
 set smartcase
 set ignorecase
 set incsearch
 "set nohlsearch
-" memory management
+" colorcolumn for line break visual
+highlight ColorColumn term=NONE cterm=NONE ctermbg=black guibg=Grey40
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" MEMORY MANAGEMENT
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set noswapfile
 " use external backup script on save 
 set nobackup
@@ -68,8 +73,6 @@ set undodir=~/.nvim/undodir
 set undofile
 " set clipboard to system clipboard
 set clipboard+=unnamedplus
-" colorcolumn for line break visual
-highlight ColorColumn term=NONE cterm=NONE ctermbg=black guibg=Grey40
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " STATUS LINE
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -200,7 +203,6 @@ autocmd Filetype tex nnoremap <buffer> <F1> :set spell!<CR>
 autocmd Filetype tex nnoremap <buffer> <LEADER>a z=
 " convert tex document to pdf
 autocmd Filetype tex nnoremap <buffer> <LEADER>b <ESC>:!pdf<SPACE>%<CR>
-" closing brackets and parentheses
 autocmd FileType tex inoremap <buffer> $ $$<ESC>i
 autocmd Filetype tex inoremap <buffer> " ""<ESC>i
 " go to center of where you want to go to insert mode
@@ -214,9 +216,9 @@ autocmd FileType tex inoremap <buffer> ;li \begin{enumerate}<CR><CR>\end{enumera
 autocmd FileType tex inoremap <buffer> ;ul \begin{itemize}<CR><CR>\end{itemize}<CR><CR>(!)<ESC>3kA\item<SPACE>
 autocmd Filetype tex inoremap <buffer> ;i \includegraphics[width=0.8\textwidth]{}<CR><CR>(!)<ESC>2kf}i
 autocmd Filetype tex inoremap <buffer> ;I \includegraphics[width=0.8\textwidth]{}<CR><CR>(!)<ESC>2kf}i
-autocmd Filetype tex inoremap <buffer> ;1s \section*{}<CR><CR>(!)<ESC>2kf}i
-autocmd Filetype tex inoremap <buffer> ;2s \subsection*{}<CR><CR>(!)<ESC>2kf}i
-autocmd Filetype tex inoremap <buffer> ;3s \subsubsection*{}<CR><CR>(!)<ESC>2kf}i
+autocmd Filetype tex inoremap <buffer> ;1s \newpage<CR>\section{}<CR><CR>(!)<ESC>2kf}i
+autocmd Filetype tex inoremap <buffer> ;2s \subsection{}<CR><CR>(!)<ESC>2kf}i
+autocmd Filetype tex inoremap <buffer> ;3s \subsubsection{}<CR><CR>(!)<ESC>2kf}i
 autocmd Filetype tex inoremap <buffer> ;np \newpage<CR><CR>
 autocmd Filetype tex inoremap <buffer> ;ma \[<CR><CR>\]<CR>(!)<ESC>2ki
 autocmd Filetype tex inoremap <buffer> ;code \begin{verbatim}<CR><CR>\end{verbatim}<CR><CR>(!)<ESC>3ki
@@ -263,8 +265,6 @@ autocmd Filetype cpp,c,hpp noremap <buffer> <C-u> <ESC>$F/F/2x<ESC>$j
 "autocmd Filetype cpp,c,hpp nnoremap <buffer> E <Plug>(coc-diagnostic-next)
 "autocmd FileType cpp,c,hpp set formatoptions=tcql
 " autocompletions
-"autocmd FileType cpp,c,hpp abbreviate #inc #include<SPACE>
-"autocmd FileType cpp,c,hpp abbreviate #def #define<SPACE>
 autocmd FileType cpp,c,hpp inoremap <buffer> #i #include<SPACE>
 autocmd FileType cpp,c,hpp inoremap <buffer> #d #define<SPACE>
 autocmd Filetype cpp,c,hpp inoremap <buffer> " ""<ESC>i
@@ -280,6 +280,5 @@ autocmd FileType cpp,hpp inoremap <buffer> ;db if(_debug){<CR><CR>}<ESC>kistd::c
 " PY 
 " settings for py related files only
 autocmd Filetype py set smartindent
-" the jump to next tag command
 autocmd Filetype py inoremap <buffer> " ""<ESC>i
 autocmd Filetype py inoremap <buffer> ' ''<ESC>i
