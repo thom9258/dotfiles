@@ -191,14 +191,14 @@ nnoremap <S-TAB> <<<ESC>
 " HTML-CSS
 autocmd FileType html,css EmmetInstall
 " VIM
-autocmd Filetype vim noremap <buffer> <LEADER>b <ESC>:source<SPACE>~/.config/nvim/init.vim<CR>
+autocmd Filetype vim nnoremap <buffer> <LEADER>b <ESC>:source<SPACE>~/.config/nvim/init.vim<CR>
 " TEX
 " Filetype recognition for latex
 let g:tex_flavor = "latex"
 autocmd Filetype tex setlocal relativenumber
 " the jump to next tag command
-" Spell-checking (note ! means to toggle)
-autocmd Filetype tex nnoremap <buffer> <F1> :set spell!<CR>
+" Spell-checking
+"autocmd Filetype tex nnoremap <buffer> <F1> :set spell!<CR>
 " check misspelled word corrections
 autocmd Filetype tex nnoremap <buffer> <LEADER>a z=
 " convert tex document to pdf
@@ -246,7 +246,6 @@ autocmd Filetype tex inoremap <buffer> __f \begin{frame}<CR>\frametitle{}<CR>(!)
 autocmd Filetype tex inoremap <buffer> __p \pause
 autocmd Filetype tex inoremap <buffer> __c \begin{columns}<CR>\column{.4\textwidth}<CR><CR>\column{.6\textwidth}<CR>(!)<CR>\end{columns}<ESC>3ki
 autocmd Filetype tex inoremap <buffer> __i \includegraphics[width=1\textwidth]{}<CR>(!)<ESC>kf{a
-
 " CPP
 " settings for c related files only
 autocmd Filetype cpp,c,hpp setlocal tabstop=2 softtabstop=2
@@ -255,8 +254,8 @@ autocmd Filetype cpp,c,hpp setlocal expandtab
 autocmd Filetype cpp,c,hpp setlocal smartindent
 autocmd FileType cpp,c,hpp setlocal cindent
 autocmd Filetype cpp,c,hpp setlocal colorcolumn=81
-autocmd Filetype cpp,c,hpp noremap <buffer> <LEADER>r <ESC>:!<SPACE>ls<CR>:!<SPACE>./
-autocmd Filetype cpp,c,hpp noremap <buffer> <LEADER>b <ESC>:!<SPACE>ls<CR>:!<SPACE>make<SPACE>clean<SPACE>;<SPACE>make<SPACE>
+autocmd Filetype cpp,c,hpp noremap <buffer> <LEADER>r <ESC>:!<SPACE>ls<CR>:!<SPACE>./a.out
+autocmd Filetype cpp,c,hpp noremap <buffer> <LEADER>b <ESC>:!<SPACE>ls<CR>:!<SPACE>make
 " comment and uncomment commands
 autocmd Filetype cpp,c,hpp noremap <buffer> <C-k> <ESC>0i//<ESC>$j
 autocmd Filetype cpp,c,hpp noremap <buffer> <C-u> <ESC>$F/F/2x<ESC>$j
@@ -277,8 +276,4 @@ autocmd FileType cpp,hpp inoremap <buffer> ;stream osfstream<SPACE>o;<CR>o.open(
 autocmd FileType cpp,hpp inoremap <buffer> ;out std::cout<SPACE><<<SPACE><SPACE><<<SPACE>std::endl;<ESC>F<SPACE>F<SPACE>i
 autocmd FileType cpp,hpp inoremap <buffer> ;class class<SPACE>{<CR>public:<CR>(!)<CR>}<ESC>3kf{i
 autocmd FileType cpp,hpp inoremap <buffer> ;db if(_debug){<CR><CR>}<ESC>kistd::cout<SPACE><<<SPACE>
-" PY 
-" settings for py related files only
-autocmd Filetype py set smartindent
-autocmd Filetype py inoremap <buffer> " ""<ESC>i
 autocmd Filetype py inoremap <buffer> ' ''<ESC>i
