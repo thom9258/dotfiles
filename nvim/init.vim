@@ -1,11 +1,14 @@
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " SOURCES FOR CONFIG SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
 source $HOME/.config/nvim/nvim-config/coc.vim"
 source $HOME/.config/nvim/monokai.vim"
+"}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " VIM PLUGIN MANAGER
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
 call plug#begin('~/.config/nvim/autoload/')
     "Intellisence, including LSP(Languange server protocol) autocomplete mm.
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -19,6 +22,10 @@ call plug#begin('~/.config/nvim/autoload/')
     Plug 'francoiscabrol/ranger.vim'
     " wm keybindings
     Plug 'fabi1cazenave/suckless.vim'
+"    Plug 'patstockwell/vim-monokai-tasty'
+"    Plug 'lsdr/monokai'
+    " Fold modifications to stop auto folding when editing
+    "Plug 'Konfekt/FastFold'
 
     " PLUGS I DONT USE ANYMORE
     "Plug 'fabi1cazenave/termopen.vim'
@@ -28,9 +35,11 @@ call plug#begin('~/.config/nvim/autoload/')
     "Plug 'neovim/nvim-lspconfig'
     "Plug 'nvim-lua/completion-nvim'
 call plug#end()
+"}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " GENERAL SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
 syntax on
 " file encoding
 set encoding=utf-8
@@ -61,9 +70,11 @@ set incsearch
 "set nohlsearch
 " colorcolumn for line break visual
 highlight ColorColumn term=NONE cterm=NONE ctermbg=black guibg=Grey40
+"}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " MEMORY MANAGEMENT
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
 set noswapfile
 " use external backup script on save 
 set nobackup
@@ -73,9 +84,11 @@ set undodir=~/.nvim/undodir
 set undofile
 " set clipboard to system clipboard
 set clipboard+=unnamedplus
+"}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " STATUS LINE
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
 " (blank)   Disaples status commands created by plugins 
 " M         Unsaved modifications
 " <         where to truncate status line if it is too long
@@ -92,9 +105,42 @@ set statusline+=\ %=
 set statusline+=\ %l/%L
 set statusline+=\ ,%c
 set statusline+=\ (%p%%)
+"}}}FOLD
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" FUNCTIONS
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
+function! Focusmode()
+ " save local settings
+" let g:statusbar_preset = &laststatus
+" let g:number_preset = &number
+" let g:relativenumber_preset = &relativenumber
+" let g:has_flipped = 0
+
+" if ( !g:has_flipped )
+"    if g:number_preset
+"        set number 
+"    endif
+"    if g:relativenumber_preset
+"        set relativenumber 
+"    endif
+"    if g:statusbar_preset
+"        set laststatus=2 
+"    endif
+"    let g:has_flipped = 0
+" else
+    set nonumber
+    set norelativenumber
+    set laststatus=0
+"    let g:has_flipped = 1
+" endif 
+endfunction
+
+"}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " KEYBINDINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
 " leader
 let mapleader=" "
 " remove normal space behavior in favor of leader behavior
@@ -102,7 +148,6 @@ nnoremap <SPACE> <Nop>
 " set custom suckless.vim keybindings
 let g:suckless_tmap = 0 
 let g:suckless_mappings = {
-\    '<M-[df]>'         :   'SetTilingMode("[df]")'         ,
 \    '<M-[hjkl]>'       :   'SelectWindow("[hjkl]")'        ,
 \    '<M-[HJKL]>'       :   'MoveWindow("[hjkl]")'          ,
 \    '<C-M-[hjkl]>'     :   'ResizeWindow("[hjkl]")'        ,
@@ -112,12 +157,13 @@ let g:suckless_mappings = {
 \    '<M-t>[123456789]' :   'MoveWindowToTab([123456789])'  ,
 \    '<M-T>[123456789]' :   'CopyWindowToTab([123456789])'  ,
 \}
+"\    '<M-[df]>'         :   'SetTilingMode("[df]")'         ,
 " override ranger keybindings
 let g:ranger_map_keys = 0
 let g:user_emmet_install_global = 0
 " open ranger file manager
 noremap <M-n> <ESC>:call CreateWindow("v")<CR>:Ranger<CR>
-noremap <LEADER>f <ESC>:Ranger<CR>
+noremap <M-f> <ESC>:Ranger<CR>
 noremap <M-RETURN> <ESC>:call CreateWindow("s")<CR>:terminal<CR>i
 " close terminal with escape
 tnoremap <ESC> <C-\><C-n>
@@ -143,9 +189,12 @@ nnoremap <SILENT> gb <C-o>zz
 inoremap { {}<ESC>i
 inoremap ( ()<ESC>i
 inoremap [ []<ESC>i
-" jump to a jump tag denoted by (!)
-inoremap <C-SPACE> <ESC>/(!)<CR>da(i
-nnoremap <C-SPACE> /(!)<CR>da(i
+" jump to a jump tag denoted by (!) and place it into the void register "_
+inoremap <C-SPACE> <ESC>/(!)<CR>"_da(i
+nnoremap <C-SPACE> /(!)<CR>"_da(i
+" disable in vim documents
+autocmd FileType vim inoremap <C-SPACE> <ESC>/<CR>   
+autocmd FileType vim nnoremap <C-SPACE> <ESC>/<CR>    
 " search and replace in entire file
 nnoremap <LEADER>s :%s///g<Left><Left><Left>
 " Force hjkl bindings
@@ -160,9 +209,13 @@ vnoremap <TAB> >><ESC>gv
 vnoremap <S-TAB> <<<ESC>gv
 nnoremap <TAB> >><ESC>
 nnoremap <S-TAB> <<<ESC>
+" Focusmode keybind
+nnoremap <LEADER>f :call Focusmode()<CR>
+"}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " FOLD SETTINGS AND BINDINGS (testing)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
 " make sure to save and load views on enter leave
 "autocmd BufWinLeave ?* mkview 1
 "autocmd BufWinEnter ?* silent! loadview 1
@@ -173,21 +226,27 @@ nnoremap <S-TAB> <<<ESC>
 "set foldmethod=manual
 "autocmd InsertLeave,WinEnter * setlocal foldmethod=marker
 "autocmd InsertEnter,WinLeave * setlocal foldmethod=manual
-"set foldmethod=marker
 "set foldnestmax=3
 "nnoremap za :setlocal<SPACE>foldmethod=marker<CR>za:setlocal<SPACE>foldmethod=manual<CR>zz
-"autocmd FileType tex inoremap ;{{ %{{{FOLD
-"autocmd FileType tex inoremap ;}} %}}}FOLD
 "autocmd FileType tex nnoremap za :set<SPACE>foldmethod=marker<CR>:set<SPACE>foldmarker={{{FOLD,}}}FOLD<CR>za:set<SPACE>foldmethod=manual<CR>zz
-"autocmd FileType vim inoremap ;{{ "{{{
-"autocmd FileType vim inoremap ;}} "}}}
-"autocmd FileType cpp,c,hpp inoremap ;{{ /*{{{*/<ESC>hi
-"autocmd FileType cpp,c,hpp inoremap ;}} /*}}}*/
-"autocmd FileType html inoremap ;{{ <!--{{{--><ESC>2hi
-"autocmd FileType html inoremap ;}} <!--}}}-->
+set foldmethod=marker
+set foldmarker={{{FOLD,}}}FOLD
+set nofoldenable
+"   " enable fastfold in all files
+"   "let g:fastfold_minlines = 0
+autocmd FileType tex inoremap ;{{ %{{{FOLD
+autocmd FileType tex inoremap ;}} %}}}FOLD
+autocmd FileType vim inoremap ;{{ "{{{FOLD
+autocmd FileType vim inoremap ;}} "}}}FOLD
+autocmd FileType cpp,c,hpp inoremap ;{{ /*{{{FOLD*/<ESC>hi
+autocmd FileType cpp,c,hpp inoremap ;}} /*}}}FOLD*/
+autocmd FileType html inoremap ;{{ <!--{{{FOLD--><ESC>2hi
+autocmd FileType html inoremap ;}} <!--}}}FOLD-->
+"}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " FILETYPE BINDINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
 " HTML-CSS
 autocmd FileType html,css EmmetInstall
 " VIM
@@ -236,6 +295,7 @@ autocmd Filetype tex inoremap <buffer> :lim \lim_{}<SPACE>(!)<ESC>F}i
 autocmd Filetype tex inoremap <buffer> :sqr \sqrt{}<SPACE>(!)<ESC>F}i
 autocmd Filetype tex inoremap <buffer> :ma \[<CR><CR>\]<CR>(!)<ESC>2ki
 autocmd Filetype tex inoremap <buffer> :bma \begin{bmatrix}<CR><CR>\end{bmatrix}<CR>(!)<ESC>2ki
+autocmd Filetype tex inoremap <buffer> :bf \mathbf{}<SPACE>(!)<ESC>F}i
 autocmd Filetype tex inoremap <buffer> :leq \leq<SPACE>
 autocmd Filetype tex inoremap <buffer> :geq \geq<SPACE>
 autocmd Filetype tex inoremap <buffer> := \equiv<SPACE>
@@ -255,10 +315,11 @@ autocmd Filetype cpp,c,hpp setlocal smartindent
 autocmd FileType cpp,c,hpp setlocal cindent
 autocmd Filetype cpp,c,hpp setlocal colorcolumn=81
 autocmd Filetype cpp,c,hpp noremap <buffer> <LEADER>r <ESC>:!<SPACE>ls<CR>:!<SPACE>./a.out
-autocmd Filetype cpp,c,hpp noremap <buffer> <LEADER>b <ESC>:!<SPACE>ls<CR>:!<SPACE>make
+autocmd Filetype cpp,c,hpp noremap <buffer> <LEADER>b <ESC>:!<SPACE>ls<CR>:!<SPACE>make clean; make
 " comment and uncomment commands
 autocmd Filetype cpp,c,hpp noremap <buffer> <C-k> <ESC>0i//<ESC>$j
 autocmd Filetype cpp,c,hpp noremap <buffer> <C-u> <ESC>$F/F/2x<ESC>$j
+autocmd Filetype cpp,c,hpp nnoremap <LEADER>m :Format<CR>
 " Jump through coc-errors
 "autocmd Filetype cpp,c,hpp nnoremap <buffer> e <Plug>(coc-diagnostic-prev)
 "autocmd Filetype cpp,c,hpp nnoremap <buffer> E <Plug>(coc-diagnostic-next)
@@ -268,12 +329,10 @@ autocmd FileType cpp,c,hpp inoremap <buffer> #i #include<SPACE>
 autocmd FileType cpp,c,hpp inoremap <buffer> #d #define<SPACE>
 autocmd Filetype cpp,c,hpp inoremap <buffer> " ""<ESC>i
 autocmd Filetype cpp,c,hpp inoremap <buffer> ' ''<ESC>i
-autocmd FileType cpp,hpp inoremap <buffer> ;thow throw<SPACE>runtime_error("");<CR>(!)<ESC>k0f"a
-autocmd FileType cpp,hpp inoremap <buffer> ;try try<CR>{<CR><CR>}<CR>catch(<SPACE>runtime_error&<SPACE>e<SPACE>)<CR>{<CR>(!)<CR>}<CR>(!)<ESC>6ki<Tab>
-autocmd FileType cpp,hpp inoremap <buffer> ;for for(){<CR>(!)<CR>}<ESC>2kf)i
-autocmd FileType cpp,hpp inoremap <buffer> ;com /**/<ESC>hi
-autocmd FileType cpp,hpp inoremap <buffer> ;stream osfstream<SPACE>o;<CR>o.open("");<ESC>F"i
-autocmd FileType cpp,hpp inoremap <buffer> ;out std::cout<SPACE><<<SPACE><SPACE><<<SPACE>std::endl;<ESC>F<SPACE>F<SPACE>i
-autocmd FileType cpp,hpp inoremap <buffer> ;class class<SPACE>{<CR>public:<CR>(!)<CR>}<ESC>3kf{i
-autocmd FileType cpp,hpp inoremap <buffer> ;db if(_debug){<CR><CR>}<ESC>kistd::cout<SPACE><<<SPACE>
-autocmd Filetype py inoremap <buffer> ' ''<ESC>i
+autocmd FileType cpp,c,hpp inoremap <buffer> ;thow throw<SPACE>runtime_error("");<CR>(!)<ESC>k0f"a
+autocmd FileType cpp,c,hpp inoremap <buffer> ;try try<CR>{<CR><CR>}<CR>catch(<SPACE>runtime_error&<SPACE>e<SPACE>)<CR>{<CR>(!)<CR>}<CR>(!)<ESC>6ki<Tab>
+autocmd FileType cpp,c,hpp inoremap <buffer> ;for for(){<CR>(!)<CR>}<ESC>2kf)i
+autocmd FileType cpp,c,hpp inoremap <buffer> ;com /**/<ESC>hi
+autocmd FileType cpp,c,hpp inoremap <buffer> ;pr std::cout<SPACE><<<SPACE><SPACE><<<SPACE>std::endl;<ESC>F<SPACE>F<SPACE>i
+autocmd FileType cpp,c,hpp inoremap <buffer> ;class class<SPACE>{<CR>public:<CR>(!)<CR>}<ESC>3kf{i
+"}}}FOLD

@@ -111,11 +111,11 @@ if ! shopt -oq posix; then
   fi
 fi
 
+alias sl='ls'
 alias mv='mv -i'
-alias rm='rm -i'
+alias rm='echo "Maybe use [ purge ] instead?"; rm -i'
 alias c='clear'
-alias clc='clear'
-alias cll='clear; ls --group-directories-first --color=always'
+alias cl='clear; ls --group-directories-first --color=always'
 alias ll='ls -AlgGh --group-directories-first --color=always'
 alias la='ls -a --group-directories-first --color=always'
 alias ls='ls --group-directories-first --color=always'
@@ -123,25 +123,38 @@ alias l='ls --group-directories-first --color=always'
 alias ..='cd .. ; ls'
 alias ...='cd .. ;cd .. ; ls'
 alias h='cd ~ ; ls'
-alias cd~='cd ~ ; ls'
-alias fm='ranger .'
-alias r='ranger .'
+alias v='nvim'
 alias rpi='. rpi'
-alias fuzzylite='~/Documents/Cpp/lib/fuzzylite-6.0/release/bin/fuzzylite'
+#alias fuzzylite='~/Documents/Cpp/lib/fuzzylite-6.0/release/bin/fuzzylite'
 alias 5sem='. 5sem'
 alias 6sem='. 6sem'
-alias v='nvim'
 alias mark='. jumpmark.sh && mark'
 alias jmp='. jumpmark.sh && jmp'
 alias listmark='. jumpmark.sh && listmark'
 alias za='zathura'
 alias matlab='matlab &'
 alias cal='ncal -3w'
+alias purge='shred -u'
+alias gpgenc='gpg -c --no-symkey-cache --cipher-algo AES256'
+alias valgrind='valgrind --leak-check=full \
+         --show-leak-kinds=all \
+         --track-origins=yes \
+         --verbose \
+         --log-file=valgrind-out.txt'
+alias todo='grep -i -n "TODO:"'
+alias proces='pgrep -i -l'
+alias process='pgrep -i -l'
+
 PATH=$PATH:~/Documents/bash/
 PATH=$PATH:~/Documents/bash/jumpmark/
 
 # The bash greeter shows    \j = amount of jobs running
 #                           \w = path to current directory
-#                           using green and write
-#PS1="[\j] \w ~> "
+#                           using green and white
 PS1='[\j]\[\033[1;32m\]\w >\[\033[00m\] '
+
+# a more simple greeter
+#PS1="\w > "
+
+# force the use of vi bindings instead of emacs!
+set -o vi

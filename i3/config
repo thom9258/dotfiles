@@ -22,7 +22,7 @@ set $font_size 11
 font pango:monospace $font_size
 
 # Wallpaper
-exec_always wallpaper -r
+#exec_always ~/Documents/bash/wallpaper -r
 
 #   -----------------
 #   | Color Schemes |
@@ -110,8 +110,8 @@ set $ws10 "10"
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec i3-sensible-terminal -e "bash"
-bindsym $mod+Shift+Return exec i3-sensible-terminal -e "fish"
+bindsym $mod+Shift+Return exec i3-sensible-terminal -e "bash"
+bindsym $mod+Return exec st
 
 # kill focused window
 bindsym $mod+Shift+q kill
