@@ -91,15 +91,6 @@ fi
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-# Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
-
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
@@ -111,9 +102,8 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# Directory processing
 alias sl='ls'
-alias mv='mv -i'
-alias rm='echo "Maybe use [ purge ] instead?"; rm -i'
 alias c='clear'
 alias cl='clear; ls --group-directories-first --color=always'
 alias ll='ls -AlgGh --group-directories-first --color=always'
@@ -123,28 +113,44 @@ alias l='ls --group-directories-first --color=always'
 alias ..='cd .. ; ls'
 alias ...='cd .. ;cd .. ; ls'
 alias h='cd ~ ; ls'
+alias dirsize='du -h'
+
+# Programs
 alias v='nvim'
-alias rpi='. rpi'
-#alias fuzzylite='~/Documents/Cpp/lib/fuzzylite-6.0/release/bin/fuzzylite'
+alias za='zathura'
+alias matlab='matlab &'
+alias cal='ncal -3w'
 alias 5sem='. 5sem'
 alias 6sem='. 6sem'
 alias mark='. jumpmark.sh && mark'
 alias jmp='. jumpmark.sh && jmp'
 alias listmark='. jumpmark.sh && listmark'
-alias za='zathura'
-alias matlab='matlab &'
-alias cal='ncal -3w'
-alias purge='shred -u'
-alias gpgenc='gpg -c --no-symkey-cache --cipher-algo AES256'
+alias mcm='make clean; make'
+#alias nmcli='wifi'
+#alias rpi='. rpi'
+#alias fuzzylite='~/Documents/Cpp/lib/fuzzylite-6.0/release/bin/fuzzylite'
+
+# File processing
 alias valgrind='valgrind --leak-check=full \
          --show-leak-kinds=all \
          --track-origins=yes \
          --verbose \
          --log-file=valgrind-out.txt'
+alias mv='mv -i'
+alias rm='echo "Maybe use [ purge ] instead?"; rm -i'
 alias todo='grep -i -n "TODO:"'
-alias proces='pgrep -i -l'
 alias process='pgrep -i -l'
+alias search='grep -irn'
+alias mcm='make clean; make'
 
+# Security
+alias purge='shred -fvuz'
+alias tarenc='tar -zcvf'
+alias tardec='tar -xvf'
+alias gpgenc='gpg -c --no-symkey-cache --cipher-algo AES256'
+# gpgdec='gpg'
+
+# Program sources
 PATH=$PATH:~/Documents/bash/
 PATH=$PATH:~/Documents/bash/jumpmark/
 
@@ -158,3 +164,6 @@ PS1='[\j]\[\033[1;32m\]\w >\[\033[00m\] '
 
 # force the use of vi bindings instead of emacs!
 set -o vi
+
+# Fix matlab rendering
+export _JAVA_AWT_WM_NONREPARENTING=1

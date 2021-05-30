@@ -1,3 +1,4 @@
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " SOURCES FOR CONFIG SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -19,9 +20,9 @@ call plug#begin('~/.config/nvim/autoload/')
     " HTML5 support
     Plug 'mattn/emmet-vim'
     " File Explorer
-    Plug 'francoiscabrol/ranger.vim'
+"    Plug 'francoiscabrol/ranger.vim'
     " wm keybindings
-    Plug 'fabi1cazenave/suckless.vim'
+"    Plug 'fabi1cazenave/suckless.vim'
 "    Plug 'patstockwell/vim-monokai-tasty'
 "    Plug 'lsdr/monokai'
     " Fold modifications to stop auto folding when editing
@@ -35,6 +36,7 @@ call plug#begin('~/.config/nvim/autoload/')
     "Plug 'neovim/nvim-lspconfig'
     "Plug 'nvim-lua/completion-nvim'
 call plug#end()
+let g:user_emmet_install_global = 0
 "}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " GENERAL SETTINGS
@@ -70,6 +72,10 @@ set incsearch
 "set nohlsearch
 " colorcolumn for line break visual
 highlight ColorColumn term=NONE cterm=NONE ctermbg=black guibg=Grey40
+" Force max tabs to be 9
+set tabpagemax=9
+" spelling dictionalies path
+let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
 "}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " MEMORY MANAGEMENT
@@ -110,35 +116,23 @@ set statusline+=\ (%p%%)
 " FUNCTIONS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "{{{FOLD
-function! Focusmode()
- " save local settings
-" let g:statusbar_preset = &laststatus
-" let g:number_preset = &number
-" let g:relativenumber_preset = &relativenumber
-" let g:has_flipped = 0
-
-" if ( !g:has_flipped )
-"    if g:number_preset
-"        set number 
-"    endif
-"    if g:relativenumber_preset
-"        set relativenumber 
-"    endif
-"    if g:statusbar_preset
-"        set laststatus=2 
-"    endif
-"    let g:has_flipped = 0
-" else
+function! Focus()
     set nonumber
     set norelativenumber
     set laststatus=0
-"    let g:has_flipped = 1
-" endif 
+endfunction
+
+function! TerminalSpawnBelow()
+    new
+    set norelativenumber
+    set nonumber
+    resize 20
+    terminal
 endfunction
 
 "}}}FOLD
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" KEYBINDINGS
+" WINDOW KEYBINDINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "{{{FOLD
 " leader
@@ -146,27 +140,58 @@ let mapleader=" "
 " remove normal space behavior in favor of leader behavior
 nnoremap <SPACE> <Nop>
 " set custom suckless.vim keybindings
-let g:suckless_tmap = 0 
-let g:suckless_mappings = {
-\    '<M-[hjkl]>'       :   'SelectWindow("[hjkl]")'        ,
-\    '<M-[HJKL]>'       :   'MoveWindow("[hjkl]")'          ,
-\    '<C-M-[hjkl]>'     :   'ResizeWindow("[hjkl]")'        ,
-\    '<M-[oO]>'         :   'CreateWindow("[sv]")'          ,
-\    '<M-q>'            :   'CloseWindow()'                 ,
-\    '<M-[123456789]>'  :   'SelectTab([123456789])'        ,
-\    '<M-t>[123456789]' :   'MoveWindowToTab([123456789])'  ,
-\    '<M-T>[123456789]' :   'CopyWindowToTab([123456789])'  ,
-\}
+"   let g:suckless_tmap = 0 
+"   let g:suckless_mappings = {
+"   \    '<M-[hjkl]>'       :   'SelectWindow("[hjkl]")'        ,
+"   \    '<M-[HJKL]>'       :   'MoveWindow("[hjkl]")'          ,
+"   \    '<C-M-[hjkl]>'     :   'ResizeWindow("[hjkl]")'        ,
+"   \    '<M-[oO]>'         :   'CreateWindow("[sv]")'          ,
+"   \    '<M-q>'            :   'CloseWindow()'                 ,
+"   \    '<M-[123456789]>'  :   'SelectTab([123456789])'        ,
+"   \    '<M-t>[123456789]' :   'MoveWindowToTab([123456789])'  ,
+"   \    '<M-T>[123456789]' :   'CopyWindowToTab([123456789])'  ,
+"   \}
 "\    '<M-[df]>'         :   'SetTilingMode("[df]")'         ,
-" override ranger keybindings
-let g:ranger_map_keys = 0
-let g:user_emmet_install_global = 0
-" open ranger file manager
-noremap <M-n> <ESC>:call CreateWindow("v")<CR>:Ranger<CR>
-noremap <M-f> <ESC>:Ranger<CR>
-noremap <M-RETURN> <ESC>:call CreateWindow("s")<CR>:terminal<CR>i
-" close terminal with escape
+
+" NEW BINDINGS THAT DOESENT SUCK
+" Open terminal
+noremap <M-RETURN> <ESC>:call TerminalSpawnBelow()<CR>i
+" Open file manager
+noremap <M-n> <ESC>:Vexplore!<CR>
+noremap <M-f> <ESC>:Explore!<CR>
+noremap <M-t> <ESC>:tabnew<CR>:Explore!<CR>
+" Close terminal with escape
 tnoremap <ESC> <C-\><C-n>
+" Move between windows
+nnoremap <A-h> <C-w>h
+nnoremap <A-j> <C-w>j
+nnoremap <A-k> <C-w>k
+nnoremap <A-l> <C-w>l
+" open current buffer in new tab page
+"nnoremap <A-!> :1tab split<CR>
+"nnoremap <A-"> :2tab split<CR>
+" Jump between tabs
+nnoremap <A-1> 1gt
+nnoremap <A-2> 2gt
+nnoremap <A-3> 3gt
+nnoremap <A-4> 4gt
+nnoremap <A-5> 5gt
+nnoremap <A-6> 6gt
+nnoremap <A-7> 7gt
+nnoremap <A-8> 8gt
+nnoremap <A-9> 9gt
+" Resize of horizontal splits
+nnoremap <A-H> :resize +2<CR>
+nnoremap <A-L> :resize -2<CR>
+" Resize of vertical splits
+"(interferes with scroll up and down in st)
+"nnoremap <A-J> :vertical resize -5<CR> 
+"nnoremap <A-K> :vertical resize +5<CR>
+"}}}FOLD
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" KEYBINDINGS
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"{{{FOLD
 " easier movement of large files
 nnoremap J 10j
 nnoremap K 10k
@@ -184,7 +209,7 @@ nnoremap U <C-r>
 nnoremap O o<ESC>
 " the jump to next tag and back commands
 nnoremap <SILENT> gd <Plug>(coc-definition) zz
-nnoremap <SILENT> gb <C-o>zz
+nnoremap <SILENT> gb <C-o>
 " closing brackets and parantheses
 inoremap { {}<ESC>i
 inoremap ( ()<ESC>i
