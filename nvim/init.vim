@@ -1,4 +1,3 @@
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " SOURCES FOR CONFIG SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -350,14 +349,15 @@ autocmd Filetype cpp,c,hpp nnoremap <LEADER>m :Format<CR>
 "autocmd Filetype cpp,c,hpp nnoremap <buffer> E <Plug>(coc-diagnostic-next)
 "autocmd FileType cpp,c,hpp set formatoptions=tcql
 " autocompletions
-autocmd FileType cpp,c,hpp inoremap <buffer> #i #include<SPACE>
-autocmd FileType cpp,c,hpp inoremap <buffer> #d #define<SPACE>
+autocmd FileType cpp,c,hpp inoremap <buffer> #inc #include<SPACE>
+autocmd FileType cpp,c,hpp inoremap <buffer> #ifn #ifndef<SPACE><CR>#endif<ESC>k$i
+autocmd FileType cpp,c,hpp inoremap <buffer> #def #define<SPACE>
 autocmd Filetype cpp,c,hpp inoremap <buffer> " ""<ESC>i
 autocmd Filetype cpp,c,hpp inoremap <buffer> ' ''<ESC>i
 autocmd FileType cpp,c,hpp inoremap <buffer> ;thow throw<SPACE>runtime_error("");<CR>(!)<ESC>k0f"a
 autocmd FileType cpp,c,hpp inoremap <buffer> ;try try<CR>{<CR><CR>}<CR>catch(<SPACE>runtime_error&<SPACE>e<SPACE>)<CR>{<CR>(!)<CR>}<CR>(!)<ESC>6ki<Tab>
 autocmd FileType cpp,c,hpp inoremap <buffer> ;for for(){<CR>(!)<CR>}<ESC>2kf)i
 autocmd FileType cpp,c,hpp inoremap <buffer> ;com /**/<ESC>hi
-autocmd FileType cpp,c,hpp inoremap <buffer> ;pr std::cout<SPACE><<<SPACE><SPACE><<<SPACE>std::endl;<ESC>F<SPACE>F<SPACE>i
-autocmd FileType cpp,c,hpp inoremap <buffer> ;class class<SPACE>{<CR>public:<CR>(!)<CR>}<ESC>3kf{i
+"autocmd FileType cpp,c,hpp inoremap <buffer> ;pr std::cout<SPACE><<<SPACE><SPACE><<<SPACE>std::endl;<ESC>F<SPACE>F<SPACE>i
+"autocmd FileType cpp,c,hpp inoremap <buffer> ;class class<SPACE>{<CR>public:<CR>(!)<CR>}<ESC>3kf{i
 "}}}FOLD
