@@ -303,7 +303,7 @@ autocmd Filetype tex inoremap <buffer> ;1s \newpage<CR>\section{}<CR><CR>(!)<ESC
 autocmd Filetype tex inoremap <buffer> ;2s \subsection{}<CR><CR>(!)<ESC>2kf}i
 autocmd Filetype tex inoremap <buffer> ;3s \subsubsection{}<CR><CR>(!)<ESC>2kf}i
 autocmd Filetype tex inoremap <buffer> ;np \newpage<CR><CR>
-autocmd Filetype tex inoremap <buffer> ;ma \[<CR><CR>\]<CR>(!)<ESC>2ki
+autocmd Filetype tex inoremap <buffer> ;ma \begin{equation}<CR><CR>\end{equation}<CR>(!)<ESC>2ki
 autocmd Filetype tex inoremap <buffer> ;code \begin{verbatim}<CR><CR>\end{verbatim}<CR><CR>(!)<ESC>3ki
 autocmd Filetype tex inoremap <buffer> ;verb \verb!!<SPACE>(!)<ESC>4hi
 autocmd Filetype tex inoremap <buffer> ;ref \href{}{(!)}<SPACE>(!)<ESC>F{F{a
@@ -317,7 +317,7 @@ autocmd Filetype tex inoremap <buffer> :sum \sum_{}^{(!)}<SPACE>(!)<ESC>F}F}i
 autocmd Filetype tex inoremap <buffer> :int \int_{}^{(!)}<SPACE>d(!)<ESC>F}F}i
 autocmd Filetype tex inoremap <buffer> :lim \lim_{}<SPACE>(!)<ESC>F}i
 autocmd Filetype tex inoremap <buffer> :sqr \sqrt{}<SPACE>(!)<ESC>F}i
-autocmd Filetype tex inoremap <buffer> :ma \[<CR><CR>\]<CR>(!)<ESC>2ki
+autocmd Filetype tex inoremap <buffer> :ma \begin{equation}<CR><CR>\end{equation}<CR>(!)<ESC>2ki
 autocmd Filetype tex inoremap <buffer> :bma \begin{bmatrix}<CR><CR>\end{bmatrix}<CR>(!)<ESC>2ki
 autocmd Filetype tex inoremap <buffer> :bf \mathbf{}<SPACE>(!)<ESC>F}i
 autocmd Filetype tex inoremap <buffer> :leq \leq<SPACE>

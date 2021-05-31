@@ -7,3 +7,11 @@ set selection-clipboard clipboard
 
 # enable incremental search
 set incremental-search true
+
+# statusbar padding
+set statusbar-h-padding 0
+set statusbar-v-padding 0
+
+#nightmode
+map i recolor
+
