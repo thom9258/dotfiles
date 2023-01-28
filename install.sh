@@ -2,12 +2,14 @@
 
 DOT_DIR="$HOME/dotfiles"
 
-ln -sfn $DOT_DIR/qtile   $HOME/.config/qtile
-ln -sfn $DOT_DIR/.bashrc $HOME/.bashrc
-ln -sfn $DOT_DIR/emacs   $HOME/.config/emacs
-ln -sfn $DOT_DIR/nvim    $HOME/.config/nvim
-ln -sfn $DOT_DIR/zathura $HOME/.config/zathura
+ln -sfn $DOT_DIR/emacs/init.el    $HOME/.emacs.d/init.el
+ln -sfn $DOT_DIR/emacs/config.org $HOME/.emacs.d/config.org
+ln -sfn $DOT_DIR/bash/bashrc.sh   $HOME/.bashrc
+ln -sfn $DOT_DIR/qtile            $HOME/.config/qtile
+ln -sfn $DOT_DIR/nvim             $HOME/.config/nvim
+ln -sfn $DOT_DIR/zathura          $HOME/.config/zathura
 
+# Add bash helper scripts to path
 
 
 
