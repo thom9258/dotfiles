@@ -39,6 +39,10 @@ Furthermore, the startup-screen can be annoying so we just boot into a blank scr
 (hl-line-mode)
 (setq inhibit-startup-screen t)
 
+;; Set font size
+(set-face-attribute 'mode-line nil  :height 100)
+(set-face-attribute 'default nil :height 100)
+
 ;; Enable line numbers globally
 (global-linum-mode t)
 ;; auto close bracket insertion. New in emacs 24
@@ -178,7 +182,7 @@ But even vim lacks some movement features that we would like... So we setup some
 ;; TODO: Make a bind to start neotree from current file directory.
 #+end_src
 
-* Org-Mode
+* Note Taking
 
 We need a way to manage files, documents and notes on a lot of stuff.
 This could be seperate from emacs but lets try experimenting with org mode, a zettlekasten method of keeping a notebook full of notes that may, or may not have correlations, and lets you easily navigate notes. 
@@ -208,7 +212,7 @@ This could be seperate from emacs but lets try experimenting with org mode, a ze
 Org mode has some bad themeing choises we would like to disable..
 
 #+begin_src emacs-lisp
-(defun th/org-mode-hook ()
+(defun th/org-mode-format ()
   "Stop the org-level headers from increasing in height relative to the other text."
   (dolist (face '(org-level-1
                   org-level-2
@@ -217,7 +221,7 @@ Org mode has some bad themeing choises we would like to disable..
                   org-level-5))
   (set-face-attribute face nil :weight 'semi-bold :height 1.0)))
 
-(add-hook 'org-mode-hook #'th/org-mode-hook)
+(add-hook 'org-mode-hook #'th/org-mode-format)
 #+end_src
 
 We are evil vim users, so we need to set our own org-roam navigation bindings, i have decided to use w as the preface for org roam bindings.
@@ -241,6 +245,17 @@ We also create a smarter method of creating notes, the default behaviour forces 
 
 ;; Max width for org images
 (setq org-image-actual-width nil)
+#+end_src
+
+** Notebook Visualization with Org Roam UI
+
+#+begin_src emacs-lisp
+;;(if (version<= emacs-version "27.0")
+;;(package-install 'websocket)
+;;(package-install 'simple-httpd)
+;;(package-install 'f)
+;;  (package-install 'org-roam-ui)
+;;)
 #+end_src
 
 * PDF management
