@@ -5,6 +5,7 @@ feh --bg-scale ~/Wallpapers/chainsawman_wallpaper.png &
 
 dropbox start &
 flameshot &
+blueman-manager &
 
 # Start Emacs daemon
 emacs --daemon &

@@ -1,9 +1,13 @@
 #!/bin/bash
 
-DOT_DIR="$HOME/dotfiles"
+#DOT_DIR="$(pwd)"
+DOT_DIR="$HOME/Dotfiles"
 
-ln -sfn $DOT_DIR/emacs/init.el    $HOME/.emacs.d/init.el
-ln -sfn $DOT_DIR/emacs/config.org $HOME/.emacs.d/config.org
+echo "Installing Dotfiles from dir \"$DOT_DIR\""
+
+ln -sfn $DOT_DIR/emacs/init.el     $HOME/.emacs.d/init.el
+ln -sfn $DOT_DIR/emacs/config.org  $HOME/.emacs.d/config.org
+ln -sfn $DOT_DIR/emacs/starter.org $HOME/.emacs.d/starter.org
 ln -sfn $DOT_DIR/bash/bashrc.sh   $HOME/.bashrc
 ln -sfn $DOT_DIR/qtile            $HOME/.config/qtile
 ln -sfn $DOT_DIR/nvim             $HOME/.config/nvim

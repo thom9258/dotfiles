@@ -1,7 +1,6 @@
 ;; ==============================================================================
 ;; Emacs init config
 ;;
-;;
 ;; This file contains som initialization stuff we need before loading our config.
 ;; We need to get basic packaging support running in order to download org mode,
 ;; so we can load our config.org properly.
@@ -21,13 +20,12 @@
 (package-initialize)
 
 ;; Download use-package to handle our packages instead of package-install
-(unless (package-installed-p ' use-package)
+(unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package install 'use-package))
 (setq use-package-always-ensure t)
 
+;; Load the config file
+(use-package org)
 (setq config-root "~/.emacs.d/")
-
-(use-package 'org)
-;;(org-babel-load-file "~/.emacs.d/config.org")
 (org-babel-load-file (concat config-root "config.org"))

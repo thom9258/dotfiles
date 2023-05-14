@@ -8,7 +8,7 @@ We need to be able to stop the server for a proper reset. This is smart if emacs
 (load "server")
 (unless (server-running-p) (server-start))
 
-;; define function to shutdown emacs server instance
+;; Server & Config Management
 (defun th/server-stop ()
   "Save buffers, Quit, and Shutdown (kill) server"
   (interactive)
@@ -19,9 +19,7 @@ We need to be able to stop the server for a proper reset. This is smart if emacs
 (defun th/reload-config ()
   "Reload config"
   (interactive)
-  ;;(org-babel-load-file "~/.emacs.d/config.org")
   (org-babel-load-file (concat config-root "config.org"))
-  ;;(load-file (concat config-root "config.el"))
   )
 #+end_src
 
@@ -39,9 +37,15 @@ Furthermore, the startup-screen can be annoying so we just boot into a blank scr
 (hl-line-mode)
 (setq inhibit-startup-screen t)
 
+;; Always follow symlinks for git sources (like this file!)
+(setq vc-follow-symlinks t)
+
+;; Life is too short for long questions
+(defalias 'yes-or-no-p 'y-or-n-p)
+
 ;; Set font size
-(set-face-attribute 'mode-line nil  :height 100)
-(set-face-attribute 'default nil :height 100)
+(set-face-attribute 'mode-line nil  :height 110)
+(set-face-attribute 'default nil :height 110)
 
 ;; Enable line numbers globally
 (global-linum-mode t)
@@ -53,18 +57,13 @@ Furthermore, the startup-screen can be annoying so we just boot into a blank scr
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups/")))
 ;; Default tab sizes
 (setq-default tab-width 4)
-
-;; line at 81 character mode
-(require 'whitespace)
-(setq whitespace-line-column 81) ;; limit line length
-(setq whitespace-style '(face lines-tail))
-(add-hook 'prog-mode-hook 'whitespace-mode)
+;; change prompt from yes or no, to y or n
+(setq use-short-answers t)
 #+end_src
 
-A useful feature is to be able to rename files that exists in open buffers.
+A useful feature is to be able to rename files that exists in open buffers without having them be dublicated.
 
 #+begin_src emacs-lisp
-;; Function to rename current file
 (defun th/rename-current-buffer-file ()
   "Renames current buffer and the buffer's file."
   (interactive)
@@ -84,6 +83,19 @@ A useful feature is to be able to rename files that exists in open buffers.
                    name (file-name-nondirectory new-name)))))))
 #+end_src
 
+Another useful feature is to use emacs as our terminal multiplexer, since we run emacs as a server.
+
+#+begin_src emacs-lisp
+;; Function to rename current file
+;; TODO: Make nterm spawn a terminal, then call rename-buffer so that we get a named terminal.
+;; Creates the possebility of having emacs be a terminal multiplexer!
+(defun th/nterm ()
+  "Create a named terminal"
+  (interactive)
+  (term)
+)
+#+end_src
+
 It is also intresting to track emacs startup time, this can be added as a hook.
 _note that this does not work for the server_, but is a useful debugging, performance tracker.
 
@@ -91,11 +103,21 @@ _note that this does not work for the server_, but is a useful debugging, perfor
 ;; Count startup time of emacs
 (add-hook 'emacs-startup-hook
           (lambda ()
-            (message "Emacs ready in %s with %d garbage collections."
+            (message "Emacs was ready in %s with %d garbage collections."
                      (format "%.2f seconds"
                              (float-time
                               (time-subtract after-init-time before-init-time)))
                      gcs-done)))
+#+end_src
+
+* 80 Column Marker
+
+#+begin_src emacs-lisp
+;; line at 81 character mode
+;;(require 'whitespace)
+;;(setq whitespace-line-column 81) ;; limit line length
+;;(setq whitespace-style '(face lines-tail))
+;;(add-hook 'prog-mode-hook 'whitespace-mode)
 #+end_src
 
 * Directory traversal
@@ -110,7 +132,7 @@ TODO: figure out a way for it to set a root directory when we want it to, and no
 
 * Evil Config
 
-Emacs bindings can be a pain.
+Emacs bindings are a pain.
 But behold, lets bastardize our creation with proper editing herecy!
 We install evil vim as our default editing mode.
 
@@ -127,7 +149,9 @@ We install evil vim as our default editing mode.
   (setq evil-want-keybinding nil)
   (setq evil-vsplit-window-right t)
   (setq evil-split-window-below t)
-  (evil-mode))
+  :config
+  (evil-mode)
+  (setq evil-search-module 'evil-search))
 
 ;; Editing but for lots of modes
 (use-package evil-collection
@@ -147,10 +171,10 @@ We install evil vim as our default editing mode.
 
 Vim needs a leader key, this makes bindings easier to reconfigure if a new leader key is defined in the future. Evil vim does not know this notion, so we define it ourselves. 
 
-But even vim lacks some movement features that we would like... So we setup some lazy movement mechanics.
+But even vim lacks some movement features that we would like... So we setup some lazy movement mechanics that is basically a copy of how i did things in vim.
 
 #+begin_src emacs-lisp
-
+;; Escape a buffer
 (define-key global-map (kbd "<escape>") #'keyboard-escape-quit)
 
 ;; Evil Leader Key
@@ -169,20 +193,24 @@ But even vim lacks some movement features that we would like... So we setup some
 (define-key evil-normal-state-map (kbd (concat LEADER "sq")) #'delete-window)
 
 ;; Buffer Management
-(define-key evil-normal-state-map (kbd (concat LEADER "bs")) 'ibuffer)
+(define-key evil-normal-state-map (kbd (concat LEADER "bs")) 'switch-to-buffer)
+(define-key evil-normal-state-map (kbd (concat LEADER "bm")) 'ibuffer)
 (define-key evil-normal-state-map (kbd (concat LEADER "bn")) 'next-buffer)
 (define-key evil-normal-state-map (kbd (concat LEADER "bp")) 'previous-buffer)
+
+;;(require 'comint)
+;;(define-key evil-normal-state-map (kbd (concat LEADER "f")) 'comint-dynamic-complete-filename)
 
 ;; Quick file scrolling
 (define-key evil-normal-state-map (kbd "J") "10j")
 (define-key evil-normal-state-map (kbd "K") "10k")
 
 ;; Toggle directory tree
-(define-key evil-normal-state-map (kbd (concat LEADER "t")) #'neotree-toggle)
+;;(define-key evil-normal-state-map (kbd (concat LEADER "t")) #'neotree-toggle)
 ;; TODO: Make a bind to start neotree from current file directory.
 #+end_src
 
-* Note Taking
+* Note Taking with Org
 
 We need a way to manage files, documents and notes on a lot of stuff.
 This could be seperate from emacs but lets try experimenting with org mode, a zettlekasten method of keeping a notebook full of notes that may, or may not have correlations, and lets you easily navigate notes. 
@@ -200,13 +228,6 @@ This could be seperate from emacs but lets try experimenting with org mode, a ze
   :config
   (org-roam-setup)
   )
-
-;; (with-eval-after-load 'org-faces
-;;   (dolist (face '(org-document-title
-;;                  org-level-1
-;;                  org-level-2
-;;                  org-level-3))
-;;    (set-face-attribute face nil :height 1.0)))
 #+end_src
 
 Org mode has some bad themeing choises we would like to disable..
@@ -238,59 +259,114 @@ We also create a smarter method of creating notes, the default behaviour forces 
 
 (define-key evil-normal-state-map (kbd (concat LEADER "wI")) 'org-roam-node-insert)
 (define-key evil-normal-state-map (kbd (concat LEADER "wi")) 'th/org-roam-node-insert-immediate)
-(define-key evil-normal-state-map (kbd (concat LEADER "wg")) 'org-roam-graph)
 (define-key evil-normal-state-map (kbd (concat LEADER "wf")) 'org-roam-node-find)
 ;; Shows backlinks for current buffer
 (define-key evil-normal-state-map (kbd (concat LEADER "wt")) 'org-roam-buffer-toggle)
 
+;; insert links to stuff that is not or roam files
+(define-key evil-normal-state-map (kbd (concat LEADER "wl")) 'org-insert-link)
+
 ;; Max width for org images
-(setq org-image-actual-width nil)
+(setq org-image-actual-width  900)
+#+end_src
+
+** visualization
+
+It would be nice to get an overview of a zettlekasten notebook. Once that shows connecitons througout the notes.
+This can be done in a awesome browser-based note navigator!
+
+#+begin_src emacs-lisp
+(use-package org-roam-ui)
+(define-key evil-normal-state-map (kbd (concat LEADER "wg")) 'org-roam-ui-open)
+#+end_src
+
+This is some weird stuff i dont know if i need..
+
+#+begin_src emacs-lisp
+;;(setq org-todo-keywords
+;;    (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+;;            (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)"))))
+;;
+;;(setq-default org-enforce-todo-dependencies t)
+;;
+;;(setq org-todo-keyword-faces
+;;    (quote (("TODO" :foreground "red" :weight bold)
+;;            ("NEXT" :foreground "blue" :weight bold)
+;;            ("DONE" :foreground "forest green" :weight bold)
+;;            ("WAITING" :foreground "orange" :weight bold)
+;;            ("HOLD" :foreground "magenta" :weight bold)
+;;            ("CANCELLED" :foreground "forest green" :weight bold)
+;;            ("MEETING" :foreground "forest green" :weight bold)
+;;            ("PHONE" :foreground "forest green" :weight bold))))
+;;;; I don't wan't the keywords in my exports by default
+;;(setq-default org-export-with-todo-keywords nil)
+
+;;(with-eval-after-load 'org-superstar
+;;(setq org-superstar-item-bullet-alist
+;;		'((?* . ?•)
+;;		(?+ . ?➤)
+;;		(?- . ?•)))
+;;(setq org-superstar-headline-bullets-list '(?\d))
+;;(setq org-superstar-special-todo-items t)
+;;(setq org-superstar-remove-leading-stars t)
+;;(setq org-hide-leading-stars t)
+;;;; Enable custom bullets for TODO items
+;;(setq org-superstar-todo-bullet-alist
+;;		'(("TODO" . ?☐)
+;;		("NEXT" . ?✒)
+;;		("HOLD" . ?✰)
+;;		("WAITING" . ?☕)
+;;		("CANCELLED" . ?✘)
+;;		("DONE" . ?✔)))
+;;(org-superstar-restart))
+;;(setq org-ellipsis " ▼ ")
 #+end_src
 
 ** Notebook Visualization with Org Roam UI
 
+* Standard Programs
+
+What about opening files?
+We would like to specify what programs opens what filetypes by default.
+
 #+begin_src emacs-lisp
-;;(if (version<= emacs-version "27.0")
-;;(package-install 'websocket)
-;;(package-install 'simple-httpd)
-;;(package-install 'f)
-;;  (package-install 'org-roam-ui)
-;;)
+(use-package openwith)
+(setq openwith-associations
+      (list
+       (list (openwith-make-extension-regexp
+              '("mpg" "mpeg" "mp3" "mp4" "m4v"
+                "avi" "wmv" "wav" "mov" "flv"
+                "ogm" "ogg" "mkv" "webm"))
+             "ffplay"
+             '(file))
+       (list (openwith-make-extension-regexp
+              '("pdf"))
+             "zathura"
+             '(file))))
+
+(openwith-mode 1)
+
+;; Supress large file warnings
+(setq large-file-warning-threshold nil)
+
 #+end_src
 
-* PDF management
-
-In order to play well with pdf's and being able to show them in buffers, we need to install some packages.
+Org mode behaves like a problem child though, and needs extra treatment for its file opening system.
 
 #+begin_src emacs-lisp
-(unless (package-installed-p 'pdf-tools)
-  (package-install 'pdf-tools))
-
-(pdf-tools-install)
-(setq-default pdf-view-display-size 'fit-width)
-;; Make pdf-tools default (also for tex compilation)
-(setq TeX-view-program-selection '((output-pdf "PDF Tools"))
-      TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
-      TeX-source-correlate-start-server t)
-(add-hook 'TeX-after-compilation-finished-functions
-          #'TeX-revert-document-buffer)
-
-;; Make pdf-tools play well with "linum-mode" for some reason..
-(add-hook 'pdf-view-mode-hook (lambda() (linum-mode -1)))
-#+end_src
-
-A useful feature in emacs is the ability to show images, we expand this feature with pdf viewing.
-
-#+begin_src emacs-lisp
-(package-install 'org-inline-pdf)
-(add-hook 'org-mode-hook #'org-inline-pdf-mode)
+;; org mode changes
+  (setq org-file-apps
+    '(("\\.docx\\'" . default)
+      ("\\.mm\\'" . default)
+      ("\\.x?html?\\'" . default)
+      ("\\.pdf\\'" . "zathura \"%s\"")
+      (auto-mode . emacs)))
 #+end_src
 
 * Development Environment
 
 We need some programming help in our emacs config.
 This is something we can do with a LSP (languange server protocol) using lsp-mode.
-We also make use of helm, a better file searcher that suits our needs.
 We need to install a lot of packages for this..
 
 #+begin_src emacs-lisp
@@ -301,6 +377,11 @@ We need to install a lot of packages for this..
   (package-refresh-contents)
   (mapc #'package-install package-selected-packages))
 
+#+end_src
+
+We also make use of helm, a better file searcher that suits our needs.
+
+#+begin_src emacs-lisp
 ;; sample `helm' configuration use https://github.com/emacs-helm/helm/ for details
 (helm-mode)
 (require 'helm-xref)
@@ -318,10 +399,52 @@ We need to install a lot of packages for this..
 
 We need to setup some stuff for the different programming languages we want to support:
 
-** C-Cpp
+** Latex
 
 #+begin_src emacs-lisp
-;; C / C++
+;;(use-package tex
+;;  :ensure t
+;;  :defer t)
+#+end_src
+
+TODO: Figure out how to disable weird latex formatting, eg subscript
+https://stackoverflow.com/questions/15180175/how-to-disable-underscore-subscripting-in-emacs-tex-input-method
+
+TODO: Do this:
+[[https://ejenner.com/post/latex-emacs/][Emacs as Latex editor]]
+
+#+begin_src emacs-lisp
+;;(eval-after-load "tex-mode" '(fset 'tex-font-lock-subscript 'ignore))
+;;(setq font-lock-maximum-decoration nil)
+#+end_src
+
+We want a lot of cool keybindings for our latex editing chores that are intuitive and fast to use.
+These are ported over from an old neovim config, but works due to emacs being in evil mode.
+
+TODO: Implement these!
+https://www.youtube.com/watch?v=Mphdtdv2_xs
+
+** LISP
+
+We need a cool lisp environment now that we are using emacs. Sly is a modern alternative to a interactive repl environment.
+We can use company to have quick intellisense in our enviroments.
+
+#+begin_src emacs-lisp
+;; Sly is a interactive lisp orogram
+(use-package sly)
+
+; Provide company autocomplete in a couple of useful environments
+(add-hook 'lisp-mode-hook 'company-mode)
+(add-hook 'tex-mode-hook 'company-mode)
+(add-hook 'org-mode-hook 'company-mode)
+#+end_src
+
+** C-Cpp
+
+https://emacs-lsp.github.io/lsp-mode/tutorials/CPP-guide/
+https://www.reddit.com/r/emacs/comments/sx1fkg/cc_development_in_emacs/
+
+#+begin_src emacs-lisp
 (add-hook 'c-mode-hook 'lsp)
 (add-hook 'c++-mode-hook 'lsp)
 
@@ -332,6 +455,8 @@ We need to setup some stuff for the different programming languages we want to s
 #+end_src
 
 ** Python
+
+Python setup
 
 #+begin_src emacs-lisp
 ;; Python lsp tutorial:
@@ -350,6 +475,7 @@ We need to setup some stuff for the different programming languages we want to s
   (require 'dap-cpptools)
   (yas-global-mode))
 #+end_src
+
 * Themes
 
 We install some themes for emacs.
@@ -363,4 +489,30 @@ We set monokai as default because of its clarity and warm usage of pastel colors
 
 ;; set a default theme
 (load-theme 'monokai t)
+#+end_src
+
+* Starter Page
+
+We can define a custom start page for our emacs, so when we create a empty buffer, we are sent to our start page instead.
+
+#+begin_src emacs-lisp
+
+(setq initial-buffer-choice "~/.emacs.d/starter.org")
+
+(define-minor-mode start-mode
+  "Provide functions for custom start page."
+  :lighter " start"
+  :keymap (let ((map (make-sparse-keymap)))
+          ;;(define-key map (kbd "M-z") 'eshell)
+            (evil-define-key 'normal start-mode-map
+              (kbd "1") '(lambda () (interactive) (find-file "~/.emacs.d/config.org"))
+              (kbd "2") '(lambda () (interactive) (find-file "~/.emacs.d/init.el"))
+              (kbd "3") '(lambda () (interactive) (find-file "~/.bashrc"))
+              (kbd "4") '(lambda () (interactive) (find-file "~/Masters-Thesis/report/main.tex"))
+              )
+          map))
+
+(add-hook 'start-mode-hook 'read-only-mode)
+(provide 'start-mode)
+
 #+end_src
