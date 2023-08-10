@@ -2,28 +2,68 @@
 
 Hello Thomas Alexgaard, ready to work?
 
-Hey bro, read this:
-just write a single page a day, on days you feel like working,
-write multiple, its *that* easy.
-
-I understand it is hard to put in the work to something that
-feels meaningless, but the truth is, there is not much time left for you to finish
-this thing. please, put in the work now, or you will regret it later...
-
-** Hotlinks
-
 |-----+---------------+-----------------------------------------------------|
 | =1= | [[elisp:(find-file (concat (getenv "HOME") "/.emacs.d/config.org"))][config.org]]    | This is the main user configuration file for Emacs. |
 | =2= | [[elisp:(find-file (concat (getenv "HOME") "/.emacs.d/init.el"))][init.el]]       | Initializer for my emacs config.                    |
 | =3= | [[elisp:(find-file (concat (getenv "HOME") "/.bashrc"))][bashrc]]        | Default bash configuration.                         |
-| =4= | [[elisp:(find-file (concat (getenv "HOME") "/Masters-Thesis/report/main.tex"))][Report]]        | Master's Thesis report                              |
 |-----+---------------+-----------------------------------------------------|
+
 To edit this file: "M-x toggle-read-only"
 To edit table: "M-x org-toggle-link-display"
 
 ** Keybindings
 
 * Mode start
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 This calls the minor mode associated with the starter file.
 

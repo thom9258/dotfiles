@@ -19,7 +19,8 @@ We need to be able to stop the server for a proper reset. This is smart if emacs
 (defun th/reload-config ()
   "Reload config"
   (interactive)
-  (org-babel-load-file (concat config-root "config.org"))
+  ;;(org-babel-load-file (concat config-root "config.org"))
+  (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
   )
 #+end_src
 
@@ -83,16 +84,22 @@ A useful feature is to be able to rename files that exists in open buffers witho
                    name (file-name-nondirectory new-name)))))))
 #+end_src
 
-Another useful feature is to use emacs as our terminal multiplexer, since we run emacs as a server.
-
+Another useful feature is to use emacs as our terminal manager, since we run emacs as a server.
+Here we create indexed terminals instead of having only one terminal active and having to rename it
+to get more.
 #+begin_src emacs-lisp
-;; Function to rename current file
-;; TODO: Make nterm spawn a terminal, then call rename-buffer so that we get a named terminal.
-;; Creates the possebility of having emacs be a terminal multiplexer!
-(defun th/nterm ()
-  "Create a named terminal"
+(defvar th/term-counter 0)
+(defun th/term ()
+  "Create a indexed terminal"
   (interactive)
-  (term)
+  (setq th/term-counter (+ th/term-counter 1))
+  (setq title (concat "Terminal-" (number-to-string th/term-counter)))
+  (setq buf-title (concat "*" title "*"))
+  (message buf-title)
+  (set-buffer (make-term title "/bin/bash"))
+  (term-mode)
+  (term-char-mode)
+  (switch-to-buffer buf-title)
 )
 #+end_src
 
@@ -110,26 +117,6 @@ _note that this does not work for the server_, but is a useful debugging, perfor
                      gcs-done)))
 #+end_src
 
-* 80 Column Marker
-
-#+begin_src emacs-lisp
-;; line at 81 character mode
-;;(require 'whitespace)
-;;(setq whitespace-line-column 81) ;; limit line length
-;;(setq whitespace-style '(face lines-tail))
-;;(add-hook 'prog-mode-hook 'whitespace-mode)
-#+end_src
-
-* Directory traversal
-
-Emacs as little support for a visual tree-like directory navigator, so we provide one.
-
-TODO: figure out a way for it to set a root directory when we want it to, and not just based on when we open it for the first time. 
-
-#+begin_src emacs-lisp
-(use-package neotree)
-#+end_src
-
 * Evil Config
 
 Emacs bindings are a pain.
@@ -139,7 +126,6 @@ We install evil vim as our default editing mode.
 #+begin_src emacs-lisp
 ;; Better undo compatability
 (use-package undo-fu)
-
 ;; Proper editing
 (use-package evil
   ;; tweak evil's configuration before loading it
@@ -166,7 +152,6 @@ We install evil vim as our default editing mode.
 (setq evil-want-keybinding nil)
 ;; no vim insert bindings
 (setq evil-undo-system 'undo-fu)
-
 #+end_src
 
 Vim needs a leader key, this makes bindings easier to reconfigure if a new leader key is defined in the future. Evil vim does not know this notion, so we define it ourselves. 
@@ -204,10 +189,6 @@ But even vim lacks some movement features that we would like... So we setup some
 ;; Quick file scrolling
 (define-key evil-normal-state-map (kbd "J") "10j")
 (define-key evil-normal-state-map (kbd "K") "10k")
-
-;; Toggle directory tree
-;;(define-key evil-normal-state-map (kbd (concat LEADER "t")) #'neotree-toggle)
-;; TODO: Make a bind to start neotree from current file directory.
 #+end_src
 
 * Note Taking with Org
@@ -215,9 +196,9 @@ But even vim lacks some movement features that we would like... So we setup some
 We need a way to manage files, documents and notes on a lot of stuff.
 This could be seperate from emacs but lets try experimenting with org mode, a zettlekasten method of keeping a notebook full of notes that may, or may not have correlations, and lets you easily navigate notes. 
 
-#+begin_src emacs-lisp
-;;(use-package org)
+Org is already loaded in init.el.
 
+#+begin_src emacs-lisp
 (setq org-src-preserve-indentation t)
 (use-package org-roam
   :ensure t
@@ -230,24 +211,15 @@ This could be seperate from emacs but lets try experimenting with org mode, a ze
   )
 #+end_src
 
-Org mode has some bad themeing choises we would like to disable..
-
+Org mode has some bad header size choises we would like to disable, ensuring optimal
+screen usage by not having huge headers.
 #+begin_src emacs-lisp
-(defun th/org-mode-format ()
-  "Stop the org-level headers from increasing in height relative to the other text."
-  (dolist (face '(org-level-1
-                  org-level-2
-                  org-level-3
-                  org-level-4
-                  org-level-5))
-  (set-face-attribute face nil :weight 'semi-bold :height 1.0)))
-
-(add-hook 'org-mode-hook #'th/org-mode-format)
+(dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4 org-level-5))
+  (set-face-attribute face nil :weight 'semi-bold :height 1.0))
 #+end_src
 
 We are evil vim users, so we need to set our own org-roam navigation bindings, i have decided to use w as the preface for org roam bindings.
 We also create a smarter method of creating notes, the default behaviour forces you to use node-insert twice, once for creating a note, and once for creating a link to a note. We make a immediate function to ease this overhead.
-
 #+begin_src emacs-lisp
 ;; Insert Org-Roam node link quickly without opening a buffer
 (defun th/org-roam-node-insert-immediate (arg &rest args)
@@ -261,13 +233,20 @@ We also create a smarter method of creating notes, the default behaviour forces 
 (define-key evil-normal-state-map (kbd (concat LEADER "wi")) 'th/org-roam-node-insert-immediate)
 (define-key evil-normal-state-map (kbd (concat LEADER "wf")) 'org-roam-node-find)
 ;; Shows backlinks for current buffer
-(define-key evil-normal-state-map (kbd (concat LEADER "wt")) 'org-roam-buffer-toggle)
-
+(define-key evil-normal-state-map (kbd (concat LEADER "wb")) 'org-roam-buffer-toggle)
 ;; insert links to stuff that is not or roam files
 (define-key evil-normal-state-map (kbd (concat LEADER "wl")) 'org-insert-link)
+#+end_src
 
+Lets also manage org roam's image capabilities with org-inline-pdf, and change viewing options.
+#+begin_src emacs-lisp
 ;; Max width for org images
 (setq org-image-actual-width  900)
+;; Start with images open
+(setq org-startup-with-inline-images t)
+;; Org pdf viewing
+(use-package org-inline-pdf)
+(add-hook 'org-mode-hook #'org-inline-pdf-mode)
 #+end_src
 
 ** visualization
@@ -280,51 +259,7 @@ This can be done in a awesome browser-based note navigator!
 (define-key evil-normal-state-map (kbd (concat LEADER "wg")) 'org-roam-ui-open)
 #+end_src
 
-This is some weird stuff i dont know if i need..
-
-#+begin_src emacs-lisp
-;;(setq org-todo-keywords
-;;    (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-;;            (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)"))))
-;;
-;;(setq-default org-enforce-todo-dependencies t)
-;;
-;;(setq org-todo-keyword-faces
-;;    (quote (("TODO" :foreground "red" :weight bold)
-;;            ("NEXT" :foreground "blue" :weight bold)
-;;            ("DONE" :foreground "forest green" :weight bold)
-;;            ("WAITING" :foreground "orange" :weight bold)
-;;            ("HOLD" :foreground "magenta" :weight bold)
-;;            ("CANCELLED" :foreground "forest green" :weight bold)
-;;            ("MEETING" :foreground "forest green" :weight bold)
-;;            ("PHONE" :foreground "forest green" :weight bold))))
-;;;; I don't wan't the keywords in my exports by default
-;;(setq-default org-export-with-todo-keywords nil)
-
-;;(with-eval-after-load 'org-superstar
-;;(setq org-superstar-item-bullet-alist
-;;		'((?* . ?•)
-;;		(?+ . ?➤)
-;;		(?- . ?•)))
-;;(setq org-superstar-headline-bullets-list '(?\d))
-;;(setq org-superstar-special-todo-items t)
-;;(setq org-superstar-remove-leading-stars t)
-;;(setq org-hide-leading-stars t)
-;;;; Enable custom bullets for TODO items
-;;(setq org-superstar-todo-bullet-alist
-;;		'(("TODO" . ?☐)
-;;		("NEXT" . ?✒)
-;;		("HOLD" . ?✰)
-;;		("WAITING" . ?☕)
-;;		("CANCELLED" . ?✘)
-;;		("DONE" . ?✔)))
-;;(org-superstar-restart))
-;;(setq org-ellipsis " ▼ ")
-#+end_src
-
-** Notebook Visualization with Org Roam UI
-
-* Standard Programs
+* Standard Programs for Filetypes
 
 What about opening files?
 We would like to specify what programs opens what filetypes by default.
@@ -348,7 +283,6 @@ We would like to specify what programs opens what filetypes by default.
 
 ;; Supress large file warnings
 (setq large-file-warning-threshold nil)
-
 #+end_src
 
 Org mode behaves like a problem child though, and needs extra treatment for its file opening system.
@@ -397,48 +331,6 @@ We also make use of helm, a better file searcher that suits our needs.
 (which-key-mode)
 #+end_src
 
-We need to setup some stuff for the different programming languages we want to support:
-
-** Latex
-
-#+begin_src emacs-lisp
-;;(use-package tex
-;;  :ensure t
-;;  :defer t)
-#+end_src
-
-TODO: Figure out how to disable weird latex formatting, eg subscript
-https://stackoverflow.com/questions/15180175/how-to-disable-underscore-subscripting-in-emacs-tex-input-method
-
-TODO: Do this:
-[[https://ejenner.com/post/latex-emacs/][Emacs as Latex editor]]
-
-#+begin_src emacs-lisp
-;;(eval-after-load "tex-mode" '(fset 'tex-font-lock-subscript 'ignore))
-;;(setq font-lock-maximum-decoration nil)
-#+end_src
-
-We want a lot of cool keybindings for our latex editing chores that are intuitive and fast to use.
-These are ported over from an old neovim config, but works due to emacs being in evil mode.
-
-TODO: Implement these!
-https://www.youtube.com/watch?v=Mphdtdv2_xs
-
-** LISP
-
-We need a cool lisp environment now that we are using emacs. Sly is a modern alternative to a interactive repl environment.
-We can use company to have quick intellisense in our enviroments.
-
-#+begin_src emacs-lisp
-;; Sly is a interactive lisp orogram
-(use-package sly)
-
-; Provide company autocomplete in a couple of useful environments
-(add-hook 'lisp-mode-hook 'company-mode)
-(add-hook 'tex-mode-hook 'company-mode)
-(add-hook 'org-mode-hook 'company-mode)
-#+end_src
-
 ** C-Cpp
 
 https://emacs-lsp.github.io/lsp-mode/tutorials/CPP-guide/
@@ -452,11 +344,60 @@ https://www.reddit.com/r/emacs/comments/sx1fkg/cc_development_in_emacs/
 (setq-default c-basic-offset 4
               tab-width 4
               indent-tabs-mode t)
+
+(setq gc-cons-threshold (* 100 1024 1024)
+      read-process-output-max (* 1024 1024)
+      treemacs-space-between-root-nodes nil
+      company-idle-delay 0.0
+      company-minimum-prefix-length 1
+      lsp-idle-delay 0.1)  ;; clangd is fast
+
+(with-eval-after-load 'lsp-mode
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+  (require 'dap-cpptools)
+  (yas-global-mode))
+#+end_src
+
+** Latex
+
+Spelling and grammer plugin:
+#+begin_src emacs-lisp
+(use-package flyspell-correct-helm)
+(dolist (hook '(tex-mode-hook))
+    (add-hook hook (lambda () (flyspell-mode 1))))
+
+(add-hook 'tex-mode-hook 'flyspell-buffer)
+#+end_src
+
+TODO: latex stuff:
+[[https://ejenner.com/post/latex-emacs/][Emacs as Latex editor]]
+
+We want a lot of cool keybindings for our latex editing chores that are intuitive and fast to use.
+These are ported over from an old neovim config, but works due to emacs being in evil mode.
+
+TODO: Implement these!
+https://www.youtube.com/watch?v=Mphdtdv2_xs
+
+** LISP
+
+We need a cool lisp environment now that we are using emacs. Sly is a modern alternative to a interactive repl environment.
+We can use company to have quick intellisense in our enviroments.
+
+[[https://joaotavora.github.io/sly/#Basic-setup][SLY documentation and setup help]]
+
+#+begin_src emacs-lisp
+;; Sly is a interactive lisp program
+(use-package sly)
+(setq inferior-lisp-program "sbcl")
+
+; Provide company autocomplete in a couple of useful environments
+(add-hook 'lisp-mode-hook 'company-mode)
+(add-hook 'tex-mode-hook 'company-mode)
+(add-hook 'org-mode-hook 'company-mode)
+
 #+end_src
 
 ** Python
-
-Python setup
 
 #+begin_src emacs-lisp
 ;; Python lsp tutorial:
@@ -508,7 +449,7 @@ We can define a custom start page for our emacs, so when we create a empty buffe
               (kbd "1") '(lambda () (interactive) (find-file "~/.emacs.d/config.org"))
               (kbd "2") '(lambda () (interactive) (find-file "~/.emacs.d/init.el"))
               (kbd "3") '(lambda () (interactive) (find-file "~/.bashrc"))
-              (kbd "4") '(lambda () (interactive) (find-file "~/Masters-Thesis/report/main.tex"))
+              ;;(kbd "4") '(lambda () (interactive) (find-file "~/Masters-Thesis/report/main.tex"))
               )
           map))
 

@@ -27,5 +27,6 @@
 
 ;; Load the config file
 (use-package org)
-(setq config-root "~/.emacs.d/")
-(org-babel-load-file (concat config-root "config.org"))
+;;(setq config-root "~/.emacs.d/")
+;;(org-babel-load-file (concat config-root "config.org"))
+(org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
