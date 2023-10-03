@@ -2,20 +2,49 @@
 
 Hello Thomas Alexgaard, ready to work?
 
-|-----+---------------+-----------------------------------------------------|
-| =1= | [[elisp:(find-file (concat (getenv "HOME") "/.emacs.d/config.org"))][config.org]]    | This is the main user configuration file for Emacs. |
-| =2= | [[elisp:(find-file (concat (getenv "HOME") "/.emacs.d/init.el"))][init.el]]       | Initializer for my emacs config.                    |
-| =3= | [[elisp:(find-file (concat (getenv "HOME") "/.bashrc"))][bashrc]]        | Default bash configuration.                         |
-|-----+---------------+-----------------------------------------------------|
+** Hotlinks
+
+|-----+------------+---------------------------|
+| =1= | [[elisp:(find-file (concat (getenv "HOME") "/.emacs.d/config.org"))][config.org]] | Emacs user config.        |
+| =2= | [[elisp:(find-file (concat (getenv "HOME") "/.emacs.d/init.el"))][init.el]]    | Emacs initializer script. |
+| =3= | [[elisp:(find-file (concat (getenv "HOME") "/.bashrc"))][bashrc]]     | Bash config.              |
+| =4= | [[elisp:(find-file (concat (getenv "HOME") "/.xmonad/xmonad.hs"))][xmonad]]     | XMonad config.            |
+|-----+------------+---------------------------|
 
 To edit this file: "M-x toggle-read-only"
 To edit table: "M-x org-toggle-link-display"
 
 ** Keybindings
 
-* Mode start
+*** Evil leader key
 
+|---------+-------------------------------------|
+| <SPACE> | Vim leader, referred to as <LEADER> |
+|---------+-------------------------------------|
 
+*** Org-Roam management
+
+|---------------+-----------------------------|
+| <LEADER> + wI | Insert and create node link |
+| <LEADER> + wi | Insert node link            |
+| <LEADER> + wf | Find node by name           |
+| <LEADER> + wb | Show backlinks and buffer   |
+| <LEADER> + wl | Insert link                 |
+|---------------+-----------------------------|
+
+*** Window & Buffer management
+
+|-----------------+---------------------------|
+| <LEADER> + hjkl | Move between windows      |
+| <LEADER> + sb   | Spawn window below        |
+| <LEADER> + sr   | Spawn window right        |
+| <LEADER> + sq   | Quit window               |
+|-----------------+---------------------------|
+| <LEADER> + bs   | Buffer search & switch    |
+| <LEADER> + bm   | Manage buffers            |
+| <LEADER> + bn   | Switch to next buffer     |
+| <LEADER> + bp   | Switch to previous buffer |
+|-----------------+---------------------------|
 
 
 

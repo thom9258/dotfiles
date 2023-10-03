@@ -1,0 +1,699 @@
+* Emacs TODO config links
+
+https://www.google.com/search?channel=fs&client=ubuntu&q=emacs+c%2B%2B+lsp+default+tab+size
+https://github.com/emacs-lsp/lsp-mode/issues/1530
+https://www.reddit.com/r/emacs/comments/gwv9l6/how_to_stop_lspmode_fixing_my_code_ever/
+
+** Configs stuff
+https://www.youtube.com/watch?v=51eSeqcaikM
+https://youtu.be/KZAhxdXOCP4
+https://www.youtube.com/watch?v=KlYctaKMixA
+https://www.youtube.com/watch?v=PKaJoqQQoIA
+https://www.youtube.com/watch?v=lFrQ-PUgKHo
+https://www.youtube.com/watch?v=Gi7yBMYZylU
+https://www.youtube.com/watch?v=rZkTBrLgzq4
+
+* Server management
+
+We want to run emacs in a server to increase startup speed, and to keep buffers alive across emacs windows. 
+To better configure a emacs server, we create a reload-config lisp function that reloads the config file.
+We need to be able to stop the server for a proper reset. This is smart if emacs starts acting out or breaks but you are still able to access new buffers.
+
+#+begin_src emacs-lisp
+(load "server")
+(unless (server-running-p) (server-start))
+
+;; Server & Config Management
+(defun th/server-stop ()
+  "Save buffers, Quit, and Shutdown (kill) server"
+  (interactive)
+  (save-some-buffers)
+  (kill-emacs)
+  )
+
+(defun th/reload-config ()
+  "Reload config"
+  (interactive)
+  (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
+  )
+#+end_src
+
+
+* Elpaca Package Manager
+
+#+begin_src emacs-lisp
+(defvar elpaca-installer-version 0.5)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil
+                              :files (:defaults (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (call-process "git" nil buffer t "clone"
+                                       (plist-get order :repo) repo)))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+#+end_src
+
+** Enable use-package support
+
+#+begin_src emacs-lisp
+;; Install use-package support
+(elpaca elpaca-use-package
+  ;; Enable :elpaca use-package keyword.
+  (elpaca-use-package-mode)
+  ;; Assume :elpaca t unless otherwise specified.
+  (setq elpaca-use-package-by-default t))
+
+;; Block until current queue processed.
+(elpaca-wait)
+
+;;When installing a package which modifies a form used at the top-level
+;;(e.g. a package which adds a use-package key word),
+;;use `elpaca-wait' to block until that package has been installed/configured.
+;;For example:
+;;(use-package general :demand t)
+;;(elpaca-wait)
+
+;; Expands to: (elpaca evil (use-package evil :demand t))
+;; (use-package evil :demand t)
+
+;;Turns off elpaca-use-package-mode current declartion
+;;Note this will cause the declaration to be interpreted immediately (not deferred).
+;;Useful for configuring built-in emacs features.
+(use-package emacs :elpaca nil :config (setq ring-bell-function #'ignore))
+
+;; Don't install anything. Defer execution of BODY
+(elpaca nil (message "deferred"))
+#+end_src
+
+* Startup Basics
+
+Lets start by changing the default heap percentage needed for automatic GC to happen.
+#+begin_src emacs-lisp
+(setq gc-cons-percentage 0.6)
+#+end_src
+
+We need to change some basic functionality and looks of emacs to modernize it.
+this includes disabling distracting features like the tool bar and menu stuff.
+Furthermore, the startup-screen can be annoying so we just boot into a blank scratch buffer instead.
+
+#+begin_src emacs-lisp
+;; Disable bars and other clutter
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(tool-bar-mode -1) 
+
+;; Always follow symlinks for git sources (like this file!)
+(setq vc-follow-symlinks t)
+
+;; Set font size
+(set-face-attribute 'mode-line nil  :height 110)
+(set-face-attribute 'default nil :height 110)
+
+;; Enable line numbers globally
+(global-linum-mode t)
+;; auto close bracket insertion. New in emacs 24
+(electric-pair-mode 1)
+;; Enable text wrap by default
+(add-hook 'text-mode-hook 'visual-line-mode)
+;; Move backup files to backup directory
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups/")))
+;; Default tab sizes
+(setq-default tab-width 4)
+;; a 80 line column
+(setq-default fill-column 80)
+;; change prompt from yes or no, to y or n
+(setq use-short-answers t)
+;; Life is too short for long questions
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;; no save files everywhere
+(setq auto-save-default nil)
+#+end_src
+
+A useful feature is to be able to rename files that exists in open buffers without having them be dublicated.
+
+#+begin_src emacs-lisp
+(defun th/rename-current-buffer-file ()
+  "Renames current buffer and the buffer's file."
+  (interactive)
+  (let* ((name (buffer-name))
+        (filename (buffer-file-name))
+        (basename (file-name-nondirectory filename)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (let ((new-name (read-file-name "New name: " (file-name-directory filename) basename nil basename)))
+        (if (get-buffer new-name)
+            (error "A buffer named '%s' already exists!" new-name)
+          (rename-file filename new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil)
+          (message "File '%s' successfully renamed to '%s'"
+                   name (file-name-nondirectory new-name)))))))
+#+end_src
+
+Another useful feature is to use emacs as our terminal manager, since we run emacs as a server.
+Here we create indexed terminals instead of having only one terminal active and having to rename it
+to get more.
+#+begin_src emacs-lisp
+(defvar th/term-counter 0)
+
+(defun th/term ()
+  "Create a indexed terminal"
+  (interactive)
+  (setq th/term-counter (+ th/term-counter 1))
+  (setq title (concat "Terminal-" (number-to-string th/term-counter)))
+  (setq buf-title (concat "*" title "*"))
+  (message buf-title)
+  (set-buffer (make-term title "/bin/bash"))
+  (term-mode)
+  (term-char-mode)
+  (switch-to-buffer buf-title))
+#+end_src
+
+* Starter Page
+
+We can define a custom start page for our emacs, so when we create a empty buffer, we are sent to our start page instead.
+
+#begin_src emacs-lisp
+(setq inhibit-startup-screen t)
+
+(setq initial-buffer-choice "~/.emacs.d/starter.org")
+
+(define-minor-mode start-mode
+  "Provide functions for custom start page."
+  :lighter " start"
+  :keymap (let ((map (make-sparse-keymap)))
+          ;;(define-key map (kbd "M-z") 'eshell)
+            (evil-define-key 'normal start-mode-map
+              (kbd "1") '(lambda () (interactive) (find-file "~/.emacs.d/config.org"))
+              (kbd "2") '(lambda () (interactive) (find-file "~/.emacs.d/init.el"))
+              (kbd "3") '(lambda () (interactive) (find-file "~/.bashrc"))
+              (kbd "4") '(lambda () (interactive) (find-file "~/.xmonad/xmonad.hs"))
+              )
+          map))
+
+(add-hook 'start-mode-hook 'read-only-mode)
+(provide 'start-mode)
+
+#end_src
+
+It is also intresting to track emacs startup time, this can be added as a hook.
+_note that this does not work for the server_, but is a useful debugging, performance tracker.
+
+#+begin_src emacs-lisp
+;; Count startup time of emacs
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (message "Emacs was ready in %s with %d garbage collections."
+                     (format "%.2f seconds"
+                             (float-time
+                              (time-subtract after-init-time before-init-time)))
+                     gcs-done)))
+#+end_src
+
+* Evil Config
+
+Emacs bindings are a pain.
+But behold, lets bastardize our creation with proper editing herecy!
+We install evil vim as our default editing mode.
+
+#+begin_src emacs-lisp
+  ;; Better undo compatability
+  (use-package undo-fu
+	:ensure t)
+  ;; Proper editing
+  (use-package evil
+	:ensure t
+	;; tweak evil's configuration before loading it
+	:init      
+	;; This is optional since it's already set to t by default.
+	(setq evil-want-integration t) 
+	(setq evil-want-keybinding nil)
+	(setq evil-vsplit-window-right t)
+	(setq evil-split-window-below t)
+	:config
+	(evil-mode)
+	(setq evil-search-module 'evil-search)
+	;; no vim insert bindings
+	(setq evil-undo-system 'undo-fu)
+  )
+
+  ;; Editing but for lots of modes
+  (use-package evil-collection
+	:ensure t
+	:after 'evil
+	:config
+	(setq evil-collection-mode-list '(dashboard dired ibuffer))
+	(setq evil-want-keybinding nil)
+	(evil-collection-init))
+
+  (use-package evil-tutor
+    :demand t)
+#+end_src
+
+Vim needs a leader key, this makes bindings easier to reconfigure if a new leader key is defined in the future. Evil vim does not know this notion, so we define it ourselves. 
+
+But even vim lacks some movement features that we would like... So we setup some lazy movement mechanics that is basically a copy of how i did things in vim.
+
+** General Keybindings
+
+#+begin_src emacs-lisp
+(use-package general
+  :ensure t
+  :config
+  (general-evil-setup)
+  (general-create-definer th/leader-keys
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC" ;; default leader key access
+    :global-prefix "M-SPC") ;; leader key access in insert mode
+  
+  (th/leader-keys
+    "b" '(:ignore t :wk "Buffer")
+    "bs" '(switch-to-buffer :wk "Switch buffer")
+    "bk" '(kill-this-buffer :wk "Kill current buffer")
+    "bn" '(next-buffer :wk "Next buffer")
+    "bp" '(previous-buffer :wk "Previous buffer")
+    "br" '(revert-buffer :wk "Reload buffer")
+    "bm" '(ibuffer :wk "Manager buffers")
+    
+    "h" '(evil-window-left :wk "Go to left window")
+    "j" '(evil-window-down :wk "Go to lower window")
+    "k" '(evil-window-up :wk "Go to upper window")
+    "l" '(evil-window-right :wk "Go to right window")
+  )
+)
+
+;; TODO: port these too..
+(define-key global-map (kbd "<escape>") #'keyboard-escape-quit)
+
+;(define-key evil-normal-state-map (kbd "J") "10j")
+;(define-key evil-normal-state-map (kbd "K") "10k")
+
+#+end_src
+
+
+#+begin_src emacs-lisp
+;; Escape a buffer
+
+;;;; Evil Leader Key
+;;(evil-set-leader 'motion (kbd "SPC"))
+;;;; Vim window movement
+;;(define-key evil-normal-state-map (kbd "<leader>h") #'evil-window-left)
+;;(define-key evil-normal-state-map (kbd "<leader>j") #'evil-window-down)
+;;(define-key evil-normal-state-map (kbd "<leader>k") #'evil-window-up)
+;;(define-key evil-normal-state-map (kbd "<leader>l") #'evil-window-right)
+;;;; Window Creation Deletion
+;;(define-key evil-normal-state-map (kbd "<leader>sb") #'split-window-below)
+;;(define-key evil-normal-state-map (kbd "<leader>sr") #'split-window-right)
+;;(define-key evil-normal-state-map (kbd "<leader>sq") #'delete-window)
+;;;; Buffer Management
+;;(define-key evil-normal-state-map (kbd "<leader>bs") #'switch-to-buffer)
+;;(define-key evil-normal-state-map (kbd "<leader>bm") #'ibuffer)
+;;(define-key evil-normal-state-map (kbd "<leader>bn") #'next-buffer)
+;;(define-key evil-normal-state-map (kbd "<leader>bp") #'previous-buffer)
+;;
+;;;;(require 'comint)
+;;;;(define-key evil-normal-state-map (kbd (concat LEADER "f")) 'comint-dynamic-complete-filename)
+
+	;; Quick file scrolling
+#+end_src
+
+* Note Taking with Org
+
+We need a way to manage files, documents and notes on a lot of stuff.
+This could be seperate from emacs but lets try experimenting with org mode, a zettlekasten method of keeping a notebook full of notes that may, or may not have correlations, and lets you easily navigate notes. 
+
+Org is already loaded in init.el.
+
+#+begin_src emacs-lisp
+(setq org-src-preserve-indentation t)
+(use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/Dropbox/Org-Roam")
+  :config
+  (org-roam-setup)
+  )
+#+end_src
+
+#+begin_src emacs-lisp
+;; NOTE: Ensure ripgrep is installed
+(use-package deadgrep)
+
+(defun th/roam-search (search-term dir)
+      "deadgrep in org-roam-directory"
+      (interactive (let (
+			 (search-term (deadgrep--read-search-term)))
+                     (list search-term org-roam-directory)
+		     ))
+      (deadgrep search-term dir))
+#+end_src
+
+Org mode has some bad header size choises we would like to disable, ensuring optimal
+screen usage by not having huge headers.
+#+begin_src emacs-lisp
+(dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4 org-level-5))
+  (set-face-attribute face nil :weight 'semi-bold :height 1.0))
+#+end_src
+
+We are evil vim users, so we need to set our own org-roam navigation bindings, i have decided to use w as the preface for org roam bindings.
+We also create a smarter method of creating notes, the default behaviour forces you to use node-insert twice, once for creating a note, and once for creating a link to a note. We make a immediate function to ease this overhead.
+#+begin_src emacs-lisp
+;; Insert Org-Roam node link quickly without opening a buffer
+(defun th/org-roam-node-insert-immediate (arg &rest args)
+  (interactive "P")
+  (let ((args (cons arg args))
+        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                  '(:immediate-finish t)))))
+    (apply #'org-roam-node-insert args)))
+
+;;(define-key evil-normal-state-map (kbd "<leader>wi") 'th/org-roam-node-insert-immediate)
+;;(define-key evil-normal-state-map (kbd "<leader>wI") 'org-roam-node-insert)
+;;(define-key evil-normal-state-map (kbd "<leader>wf") 'org-roam-node-find)
+;; Shows backlinks for current buffer  
+;;(define-key evil-normal-state-map (kbd "<leader>wb") 'org-roam-buffer-toggle)
+;; insert links to stuff that is not or roam files
+;;(define-key evil-normal-state-map (kbd "<leader>wl") 'org-insert-link)
+#+end_src
+
+Lets also manage org roam's image capabilities with org-inline-pdf, and change viewing options.
+#+begin_src emacs-lisp
+;; Max width for org images
+(setq org-image-actual-width  900)
+;; Start with images open
+(setq org-startup-with-inline-images t)
+;; Org pdf viewing
+(use-package org-inline-pdf)
+(add-hook 'org-mode-hook #'org-inline-pdf-mode)
+#+end_src
+
+** visualization
+
+It would be nice to get an overview of a zettlekasten notebook. Once that shows connecitons througout the notes.
+This can be done in a awesome browser-based note navigator!
+
+#+begin_src emacs-lisp
+(use-package org-roam-ui)
+;;(define-key evil-normal-state-map (kbd "<leader>wg") 'org-roam-ui-open)
+#+end_src
+
+* Standard Programs for Filetypes
+
+What about opening files?
+We would like to specify what programs opens what filetypes by default.
+
+#+begin_src emacs-lisp
+;;(use-package openwith)
+;;(setq openwith-associations
+;;	(list
+;;	(list (openwith-make-extension-regexp
+;;			'("mpg" "mpeg" "mp3" "mp4" "m4v"
+;;				"avi" "wmv" "wav" "mov" "flv"
+;;				"ogm" "ogg" "mkv" "webm"))
+;;			"ffplay"
+;;			'(file))
+;;	(list (openwith-make-extension-regexp
+;;			'("pdf"))
+;;			"zathura"
+;;			'(file))))
+;;
+;;(openwith-mode 1)
+
+;; Supress large file warnings
+(setq large-file-warning-threshold nil)
+#+end_src
+
+Org mode behaves like a problem child though, and needs extra treatment for its file opening system.
+
+#+begin_src emacs-lisp
+;; org mode changes
+  (setq org-file-apps
+    '(("\\.docx\\'" . default)
+      ("\\.mm\\'" . default)
+      ("\\.x?html?\\'" . default)
+      ("\\.pdf\\'" . "zathura \"%s\"")
+      (auto-mode . emacs)))
+#+end_src
+
+* Development Environment
+
+Easier overview of open buffers with tabs!
+https://github.com/ema2159/centaur-tabs#what-is-this
+
+#begin_src emacs-lisp
+(use-package centaur-tabs
+    :demand
+    :config
+    (centaur-tabs-mode t)
+    (setq centaur-tabs-style "rounded")
+    (setq centaur-tabs-set-bar 'under)
+    (setq centaur-tabs-set-icons t)
+    (setq centaur-tabs-cycle-scope 'tabs)
+    :bind
+    ("<leader>n" . centaur-tabs-backward)
+    ("<leader>m" . centaur-tabs-forward)
+)
+
+(defun centaur-tabs-hide-tab (x)
+  "Do no to show buffer X in tabs."
+  (let ((name (format "%s" x)))
+    (or
+     ;; Current window is not dedicated window.
+     (window-dedicated-p (selected-window))
+
+     ;; Buffer name not match below blacklist.
+     (string-prefix-p "*epc" name)
+     (string-prefix-p "*helm" name)
+     (string-prefix-p "*Helm" name)
+     (string-prefix-p "*Compile-Log*" name)
+     (string-prefix-p "*lsp" name)
+     (string-prefix-p "*company" name)
+     (string-prefix-p "*Flycheck" name)
+     (string-prefix-p "*tramp" name)
+     (string-prefix-p " *Mini" name)
+     (string-prefix-p "*help" name)
+     (string-prefix-p "*straight" name)
+     (string-prefix-p " *temp" name)
+     (string-prefix-p "*Help" name)
+     (string-prefix-p "*mybuf" name)
+
+     ;; Is not magit buffer.
+     (and (string-prefix-p "magit" name)
+          (not (file-name-extension name)))
+     )))
+#end_src
+
+We need some programming help in our emacs config.
+This is something we can do with a LSP (languange server protocol) using lsp-mode.
+We need to install a lot of packages for this..
+
+#+begin_src emacs-lisp
+(setq package-selected-packages '(lsp-mode
+                                  yasnippet
+                                  lsp-treemacs
+                                  helm-lsp
+                                  projectile
+                                  hydra
+                                  flycheck
+                                  company
+                                  avy
+                                  which-key
+                                  helm-xref
+                                  dap-mode))
+
+(when (cl-find-if-not #'package-installed-p package-selected-packages)
+  (package-refresh-contents)
+  (mapc #'package-install package-selected-packages))
+
+#+end_src
+
+[[https://emacs-lsp.github.io/lsp-mode/page/languages/][LSP server install guides]]
+
+We also make use of helm, a better file searcher that suits our needs.
+
+#+begin_src emacs-lisp
+;; sample `helm' configuration use https://github.com/emacs-helm/helm/ for details
+(helm-mode)
+(require 'helm-xref)
+(define-key global-map [remap find-file] #'helm-find-files)
+(define-key global-map [remap execute-extended-command] #'helm-M-x)
+(define-key global-map [remap switch-to-buffer] #'helm-mini)
+
+;; Tab completion instead of enter completion(define-key helm-map (kbd "TAB") #'helm-execute-persistent-action)
+(define-key helm-map (kbd "TAB") #'helm-execute-persistent-action)
+(define-key helm-map (kbd "<tab>") #'helm-execute-persistent-action)
+(define-key helm-map (kbd "C-z") #'helm-select-action)
+
+(which-key-mode)
+#+end_src
+
+#+begin_src emacs-lisp
+(setq gc-cons-threshold (* 100 1024 1024) ;; 100 mb
+      read-process-output-max (* 1024 1024)
+      treemacs-space-between-root-nodes nil
+      company-idle-delay 0.0
+      company-minimum-prefix-length 1
+      lsp-idle-delay 0.1)  ;; clangd is fast
+#+end_src
+
+** C-Cpp
+
+https://emacs-lsp.github.io/lsp-mode/tutorials/CPP-guide/
+https://www.reddit.com/r/emacs/comments/sx1fkg/cc_development_in_emacs/
+
+check this out
+https://nilsdeppe.com/posts/emacs-c++-ide
+
+#+begin_src emacs-lisp
+(setq c-default-style "linux")
+(setq-default c-basic-offset 4
+              tab-width 4
+              indent-tabs-mode t)
+#+end_src
+
+.#+begin_src emacs-lisp
+(add-hook 'c-mode-hook 'lsp)
+(add-hook 'c++-mode-hook 'lsp)
+
+(with-eval-after-load 'lsp-mode
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+    ;; Connect lsp bindings with evil mode
+    (evil-define-minor-mode-key 'normal lsp-mode (kbd "<SPC>,") lsp-command-map)
+  (require 'dap-cpptools)
+  (yas-global-mode))
+
+; (setq flycheck-gcc-language-standard "c++20")
+(add-hook 'c++-mode-hook
+          (lambda () (setq flycheck-clang-language-standard "c++20")))
+(add-hook 'c++-mode-hook
+          (lambda () (setq flycheck-gcc-language-standard "c++20")))
+#+end_src
+
+** Latex
+
+Spelling and grammer plugin:
+#+begin_src emacs-lisp
+(use-package flyspell-correct-helm)
+(dolist (hook '(tex-mode-hook))
+    (add-hook hook (lambda () (flyspell-mode 1))))
+
+(add-hook 'tex-mode-hook 'flyspell-buffer)
+#+end_src
+
+TODO: latex stuff:
+[[https://ejenner.com/post/latex-emacs/][Emacs as Latex editor]]
+
+We want a lot of cool keybindings for our latex editing chores that are intuitive and fast to use.
+These are ported over from an old neovim config, but works due to emacs being in evil mode.
+
+TODO: Implement these!
+https://www.youtube.com/watch?v=Mphdtdv2_xs
+
+** LISP
+
+We need a cool lisp environment now that we are using emacs. Sly is a modern alternative to a interactive repl environment.
+We can use company to have quick intellisense in our enviroments.
+
+[[https://joaotavora.github.io/sly/#Basic-setup][SLY documentation and setup help]]
+
+#+begin_src emacs-lisp
+;; Sly is a interactive lisp program
+(use-package sly)
+(setq inferior-lisp-program "sbcl")
+
+; Provide company autocomplete in a couple of useful environments
+(add-hook 'lisp-mode-hook 'company-mode)
+(add-hook 'tex-mode-hook 'company-mode)
+(add-hook 'org-mode-hook 'company-mode)
+#+end_src
+
+** Python
+
+[[https://taingram.org/blog/emacs-lsp-ide.html][Python lsp tutorial]]
+
+#+begin_src emacs-lisp
+(add-hook 'python-mode-hook 'lsp)
+
+(with-eval-after-load 'lsp-mode
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+  (require 'dap-cpptools)
+  (yas-global-mode))
+#+end_src
+
+** Haskell
+
+TODO: Fix haskell lsp!
+https://bebyx.co.ua/en/log/emacs-haskell-lsp.html
+
+#+begin_src emacs-lisp
+(use-package haskell-mode) ; install mode for Haskell files
+(use-package lsp-ui) ; that's a nice LSP package as well
+(use-package lsp-haskell
+  :hook
+  (haskell-mode . lsp)
+  (haskell-literate-mode . lsp))
+;;(add-hook 'haskell-mode-hook #'lsp)
+;;(add-hook 'haskell-literate-mode-hook #'lsp)
+
+;; locate the ghcup binaries
+(setenv "PATH" (concat (getenv "PATH") ":" (expand-file-name "~/.ghcup/bin")))
+(setq exec-path (append exec-path '(expand-file-name "~/.ghcup/bin")))
+#+end_src
+
+* Themes
+
+We install some themes for emacs.
+We set monokai as default because of its clarity and warm usage of pastel colors.
+
+#+begin_src emacs-lisp
+  (use-package better-defaults)
+
+  (use-package monokai-theme
+    :demand t 
+	:config
+	  (load-theme 'monokai t))
+
+  ;; set a default theme
+  ;;(use-package  gruvbox-theme
+	  ;;:config
+	  ;(load-theme 'gruvbox-dark-hard t))
+#+end_src
+
+Enable current line bar after the theme is loaded
+#+begin_src emacs-lisp
+; TODO: not working!
+(hl-line-mode t)
+#+end_src
+
+
