@@ -10,18 +10,28 @@
   - [[#enable-use-package-support][Enable use-package support]]
 - [[#startup-basics][Startup Basics]]
   - [[#visual-interface-tweaks][Visual Interface Tweaks]]
+  - [[#text-zoom-inout][Text Zoom in/out]]
   - [[#custom-behaviour][Custom behaviour]]
 - [[#evil-config][Evil Config]]
-- [[#general][General]]
+- [[#general-keybind-manager][General Keybind Manager]]
   - [[#general-keybinds][General Keybinds]]
-- [[#note-taking-with-org][Note Taking with Org]]
+- [[#org-note-taking][Org Note Taking]]
+  - [[#org-roam-zettlekasten][Org Roam Zettlekasten]]
 - [[#which-key][Which Key]]
+- [[#sudo-edit-files][Sudo edit files]]
+  - [[#all-the-icons][All the icons]]
 - [[#starter-page][Starter Page]]
+  - [[#dashboard-greeter][Dashboard Greeter]]
 - [[#themes][Themes]]
+- [[#software-development][Software Development]]
+  - [[#lsp-languange-server-protocol-setup][LSP Languange Server Protocol Setup]]
+  - [[#c--c-formatting][C & C++ formatting]]
+  - [[#snipptes][Snipptes]]
 
 * Config example stuff
 
 DistroTube Emacs (GOING THROUGH THIS NOW):
+https://gitlab.com/dwt1/configuring-emacs
 https://www.youtube.com/watch?v=4ZH9pobulDo&list=PL5--8gKSku15e8lXf7aLICFmAHQVo0KXX&index=2
 
 
@@ -52,14 +62,12 @@ We need to be able to stop the server for a proper reset. This is smart if emacs
   "Save buffers, Quit, and Shutdown (kill) server"
   (interactive)
   (save-some-buffers)
-  (kill-emacs)
-  )
+  (kill-emacs))
 
 (defun th/reload-config ()
   "Reload config"
   (interactive)
-  (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
-  )
+  (org-babel-load-file (expand-file-name "config.org" user-emacs-directory)))
 #+end_src
 
 * Elpaca Package Manager
@@ -135,18 +143,18 @@ Lets start by changing the default heap percentage needed for automatic GC to ha
 
 Basic changes
 #+begin_src emacs-lisp
-  ;; Move backup files to backup directory
-  (setq backup-directory-alist '(("." . "~/.emacs.d/backups/")))
-  ;; Default tab sizes
-  (setq-default tab-width 4)
-  ;; a 80 line column
-  (setq-default fill-column 80)
-  ;; Life is too short for long questions
-  (setq use-short-answers t)
-  (defalias 'yes-or-no-p 'y-or-n-p)
+;; Move backup files to backup directory
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups/")))
+;; Default tab sizes
+(setq-default tab-width 4)
+;; a 80 line column
+(setq-default fill-column 80)
+;; Life is too short for long questions
+(setq use-short-answers t)
+(defalias 'yes-or-no-p 'y-or-n-p)
 
-  ;; no save files everywhere
-  (setq auto-save-default nil)
+;; no save files everywhere
+(setq auto-save-default nil)
 #+end_src
 
 ** Visual Interface Tweaks
@@ -161,16 +169,33 @@ We need to change some basic functionality and looks of emacs to modernize it, t
 
 ;; auto close bracket insertion. New in emacs 24
 (electric-pair-mode 1)
+
+;; remove auto indentation that kills formatting
+(electric-indent-mode -1)
 ;; Enable text wrap by default
 (global-visual-line-mode t)
 ;; Enable relative line numbers globally
-;(global-linum-mode t)
-(setq display-line-numbers 'relative)
+(global-display-line-numbers-mode t)
+
+;; TODO: not exactly working!
+(defun th/toggle-line-number-type ()
+  (interactive)
+  (if (equal display-line-numbers-type 'relative) 
+    (setq display-line-numbers 'global)
+    (setq display-line-numbers 'relative)))
 
 ;; Set font size
 (setq th/font-size 110)
 (set-face-attribute 'mode-line nil  :height th/font-size)
 (set-face-attribute 'default nil :height th/font-size)
+#+end_src
+
+** Text Zoom in/out
+
+Text zooming is highly needed for when you work on different screens!
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-+") 'text-scale-increase)
+(global-set-key (kbd "C--") 'text-scale-decrease)
 #+end_src
 
 ** Custom behaviour
@@ -200,19 +225,19 @@ Another useful feature is to use emacs as our terminal manager, since we run ema
 Here we create indexed terminals instead of having only one terminal active and having to rename it
 to get more.
 #+begin_src emacs-lisp
-  (defvar th/term-counter 0)
+(defvar th/term-counter 0)
 
-  (defun th/term ()
-    "Create a indexed terminal"
-    (interactive)
-    (setq th/term-counter (+ th/term-counter 1))
-    (setq title (concat "Terminal-" (number-to-string th/term-counter)))
-    (setq buf-title (concat "*" title "*"))
-    (message buf-title)
-    (set-buffer (make-term title "/bin/bash"))
-    (term-mode)
-    (term-char-mode)
-    (switch-to-buffer buf-title))
+(defun th/term ()
+  "Create a indexed terminal"
+  (interactive)
+  (setq th/term-counter (+ th/term-counter 1))
+  (setq title (concat "Terminal-" (number-to-string th/term-counter)))
+  (setq buf-title (concat "*" title "*"))
+  (message buf-title)
+  (set-buffer (make-term title "/bin/bash"))
+  (term-mode)
+  (term-char-mode)
+  (switch-to-buffer buf-title))
 #+end_src
 
 * Evil Config
@@ -222,170 +247,180 @@ But behold, lets bastardize our creation with proper editing herecy!
 We install evil vim as our default editing mode.
 
 #+begin_src emacs-lisp
-  ;; Better undo compatability
-  (use-package undo-fu
-	:demand t)
-  ;; Proper editing
-  (use-package evil
-	:demand t
-	;; tweak evil's configuration before loading it
-	:init      
-	;; This is optional since it's already set to t by default.
-	(setq evil-want-integration t) 
-	(setq evil-want-keybinding nil)
-	(setq evil-vsplit-window-right t)
-	(setq evil-split-window-below t)
-	:config
-	(evil-mode)
-	(setq evil-search-module 'evil-search)
-	;; no vim insert bindings
-	(setq evil-undo-system 'undo-fu)
-  )
+	;; Better undo compatability
+(use-package undo-fu
+  :ensure t)
+	;; Proper editing
+(use-package evil
+  :ensure t
+  ;; tweak evil's configuration before loading it
+  :init      
+  ;; This is optional since it's already set to t by default.
+  (setq evil-want-integration t) 
+  (setq evil-want-keybinding nil)
+  (setq evil-vsplit-window-right t)
+  (setq evil-split-window-below t)
+  :config
+  (evil-mode)
+  (setq evil-search-module 'evil-search)
+  ;; no vim insert bindings
+  (setq evil-undo-system 'undo-fu))
 
-  ;; Editing but for lots of modes
-  (use-package evil-collection
-	:demand t
-	:after 'evil
-	:config
-	(setq evil-collection-mode-list '(dashboard dired ibuffer))
-	(setq evil-want-keybinding nil)
-	(evil-collection-init))
+	;; Editing but for lots of modes
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :config
+  (setq evil-collection-mode-list '(dashboard dired ibuffer))
+  (setq evil-want-keybinding nil)
+  (evil-collection-init))
 
-  (use-package evil-tutor
-    :demand t)
+(use-package evil-tutor
+  :ensure t)
 #+end_src
 
 Vim needs a leader key, this makes bindings easier to reconfigure if a new leader key is defined in the future. Evil vim does not know this notion, so we define it ourselves. 
 
 But even vim lacks some movement features that we would like... So we setup some lazy movement mechanics that is basically a copy of how i did things in vim.
 
-* General
+* General Keybind Manager
 
 #+begin_src emacs-lisp
 (use-package general
-  :demand t
+  :ensure t
   :config
-  (general-evil-setup)
-  (general-create-definer th/leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC" ;; default leader key access
-    :global-prefix "M-SPC") ;; leader key access in insert mode
+    (general-evil-setup)
+    
+    (general-create-definer th/leader-keys
+      :states '(normal insert visual emacs)
+      :keymaps 'override
+      :prefix "SPC" ;; default leader key access
+      :global-prefix "M-SPC") ;; leader key access in insert mode
+    
+    (th/leader-keys ; Buffer management
+      "b" '(:ignore t :wk "Buffer")
+      "b s" '(switch-to-buffer :wk "Switch buffer")
+      "b k" '(kill-this-buffer :wk "Kill current buffer")
+      "b n" '(next-buffer :wk "Next buffer")
+      "b p" '(previous-buffer :wk "Previous buffer")
+      "b r" '(revert-buffer :wk "Reload buffer")
+      "b m" '(ibuffer :wk "Manager buffers"))
+
+    (th/leader-keys ; Evil window management
+      "h" '(evil-window-left :wk "Go to left window")
+      "j" '(evil-window-down :wk "Go to lower window")
+      "k" '(evil-window-up :wk "Go to upper window")
+      "l" '(evil-window-right :wk "Go to right window"))
+
+    (th/leader-keys ; elisp evaluation
+      "e" '(:ignore t :wk "Evaluate elisp")
+      "e b" '(eval-buffer :wk "Evaluate buffer")
+      "e d" '(eval-defun :wk "Evaluate function at or after point")
+      "e e" '(eval-expression :wk "Evaluate expression")
+      "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+      "e r" '(eval-region :wk "Evaluate elisp region")
+      "e c" '((lambda () (interactive) (load-file "~/.emacs.d/init.el")) :wk "Evaluate emacs config"))
+
+    (th/leader-keys ; commenting
+      "TAB TAB" '(comment-line :wk "Comment line at point"))
+
+    (th/leader-keys ; find keybinds
+      "f" '(:ignore t :wk "Find")
+      "f f" '(find-file :wk "Find file")
+      "f c" '((lambda ()
+              (interactive)
+              (find-file (expand-file-name "config.org" user-emacs-directory)))
+              :wk "Goto emacs config file"))
+      
+    (define-key global-map (kbd "<escape>") #'keyboard-escape-quit)
+
+    (th/leader-keys ; Help stuff
+      "d" '(:ignore t :wk "Describe (Help)")
+      "d f" '(describe-function :wk "Describe function")
+      "d v" '(describe-variable :wk "Describe variable"))
+
+    (th/leader-keys ; Togglers
+      "t" '(:ignore t :wk "Toggle")
+      "t l" '(display-line-numbers-mode :wk "Display line numbers")
+      "t t" '(toggle-truncated-lines :wk "toggle line-wrapping"))
+
 )
 #+end_src
 
 ** General Keybinds
 
 #+begin_src emacs-lisp
-(th/leader-keys ; Buffer management
-  "b" '(:ignore t :wk "Buffer")
-  "b s" '(switch-to-buffer :wk "Switch buffer")
-  "b k" '(kill-this-buffer :wk "Kill current buffer")
-  "b n" '(next-buffer :wk "Next buffer")
-  "b p" '(previous-buffer :wk "Previous buffer")
-  "b r" '(revert-buffer :wk "Reload buffer")
-  "b m" '(ibuffer :wk "Manager buffers"))
-
-(th/leader-keys ; Evil window management
-  "h" '(evil-window-left :wk "Go to left window")
-  "j" '(evil-window-down :wk "Go to lower window")
-  "k" '(evil-window-up :wk "Go to upper window")
-  "l" '(evil-window-right :wk "Go to right window"))
-
-(th/leader-keys ; elisp evaluation
-  "e" '(:ignore t :wk "Evaluate elisp")
-  "e b" '(eval-buffer :wk "Evaluate buffer")
-  "e d" '(eval-defun :wk "Evaluate function at or after point")
-  "e e" '(eval-expression :wk "Evaluate expression")
-  "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-  "e r" '(eval-region :wk "Evaluate elisp region"))
-
-(th/leader-keys ; miscelaneous keybinds
-  "." '(find-file :wk "Find file")
-  "TAB TAB" '(comment-line :wk "Comment line at point")
-  "f c" '((lambda ()
-           (interactive)
-           (find-file (expand-file-name "config.org" user-emacs-directory)))
-        :wk "Goto emacs config file"))
-
-(define-key global-map (kbd "<escape>") #'keyboard-escape-quit)
-
-(th/leader-keys ; Help stuff
-  "d" '(:ignore t :wk "Describe (Help)")
-  "d f" '(describe-function :wk "Describe function")
-  "d v" '(describe-variable :wk "Describe variable"))
   ;; TODO: port these too..
 ;; (define-key evil-normal-state-map (kbd "J") "10j")
 ;; (define-key evil-normal-state-map (kbd "K") "10k")
 #+end_src
 
-* Note Taking with Org
+* Org Note Taking
 
 Org is already loaded in init.el.
 
 Enable table of content generation:
 #+begin_src emacs-lisp
 (use-package toc-org
-  :demand t
+  :ensure t
   :commands toc-org-enable
   :init (add-hook 'org-mode-hook 'toc-org-enable))
 #+end_src
 
+
+** Org Roam Zettlekasten
+
 We need a way to manage files, documents and notes on a lot of stuff.
 This could be seperate from emacs but lets try experimenting with org mode, a zettlekasten method of keeping a notebook full of notes that may, or may not have correlations, and lets you easily navigate notes. 
 #+begin_src emacs-lisp
-  (setq org-src-preserve-indentation t)
-  (use-package org-roam
-    :demand t
-    :init
-      (setq org-roam-v2-ack t)
-    :custom
-      (org-roam-directory "~/Dropbox/Org-Roam")
-    :config
-      (org-roam-setup)
-      (defun th/org-roam-node-insert-immediate (arg &rest args)
-          (interactive "P")
-          (let ((args (cons arg args))
-                  (org-roam-capture-templates (list (append (car org-roam-capture-templates)
-                                                          '(:immediate-finish t)))))
-              (apply #'org-roam-node-insert args)))
+(setq org-src-preserve-indentation t)
+(use-package org-roam
+  :ensure t
+  :init
+    (setq org-roam-v2-ack t)
+  :custom
+    (org-roam-directory "~/Dropbox/Org-Roam")
+  :config
+    (org-roam-setup)
+    (defun th/org-roam-node-insert-immediate (arg &rest args)
+        (interactive "P")
+        (let ((args (cons arg args))
+                (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                        '(:immediate-finish t)))))
+            (apply #'org-roam-node-insert args)))
 
-      (th/leader-keys
-        "wI" '(org-roam-node-insert :wk "Insert link to node")
-        "wi" '(th/org-roam-node-insert-immediate :wk "Insert link and create node")
-        "wf" '(org-roam-node-find :wk "Find node")
-        "wb" '(org-roam-buffer-toggle :wk "Toggle roam buffer")
-        "wl" '(org-insert-link :wk "Insert link")
-      )
+    (th/leader-keys
+      "w" '(:ignore t :wk "Roam Wiki")
+      "wI" '(org-roam-node-insert :wk "Insert link to node")
+      "wi" '(th/org-roam-node-insert-immediate :wk "Insert link and create node")
+      "wf" '(org-roam-node-find :wk "Find node")
+      "wb" '(org-roam-buffer-toggle :wk "Toggle roam buffer")
+      "wl" '(org-insert-link :wk "Insert link")
     )
+)
 #+end_src
-
 
 We want a efficient way of searching in our roam notebook
 #+begin_src emacs-lisp
 (use-package deadgrep
-  :demand t
+  :ensure t
   :after org-roam
   :config
     (defun th/roam-search (search-term dir)
-          "deadgrep in org-roam-directory"
-          (interactive (let (
-                 (search-term (deadgrep--read-search-term)))
-                         (list search-term org-roam-directory)
-                 ))
-          (deadgrep search-term dir))
-  )
+      "deadgrep in org-roam-directory"
+      (interactive (let ((search-term (deadgrep--read-search-term)))
+                     (list search-term org-roam-directory)))
+      (deadgrep search-term dir)))
 #+end_src
 
 We also want a cool notebook visualizer
 #+begin_src emacs-lisp
 (use-package org-roam-ui
-  :demand t
+  :ensure t
   :after org-roam
   :config
     (th/leader-keys
-      "wg" '(org-roam-ui-open :wk "Open roam graph"))
-)
+      "w g" '(org-roam-ui-open :wk "Open roam graph")))
 #+end_src
 
 * Which Key
@@ -393,7 +428,7 @@ We also want a cool notebook visualizer
 Command autocompletion is a must for a complete experience:
 #+begin_src emacs-lisp
 (use-package which-key
-  :demand t
+  :ensure t
   :init
     (which-key-mode 1)
   :config
@@ -407,9 +442,34 @@ Command autocompletion is a must for a complete experience:
           which-key-side-window-max-height     0.25
           which-key-idle-delay                 0.2
           which-key-max-description-length     25
-          which-key-allow-imprecise-window-fit t
-    ))
+          which-key-allow-imprecise-window-fit nil))
 #+end_src
+
+* Sudo edit files
+
+Force edit files
+#+begin_src emacs-lisp
+(use-package sudo-edit
+  :ensure t
+  :config
+    (th/leader-keys
+      "s" '(:ignore t :wk "Sudo edit")
+      "s u" '(sudo-edit :wk "Sudo edit current file")
+      "s f" '(sudo-edit-find-file :wk "Sudo find file")))
+#+end_src
+
+** All the icons
+
+#+begin_src emacs-lisp
+(use-package all-the-icons
+  :ensure t
+  :if (display-graphic-p))
+
+(use-package all-the-icons-dired
+  :ensure t
+  :hook (dired-mode . (lambda () (all-the-icons-dired-mode j))))
+#+end_src
+
 
 * Starter Page
 
@@ -424,6 +484,33 @@ Command autocompletion is a must for a complete experience:
                      gcs-done)))
 #+end_src
 
+** Dashboard Greeter
+
+Setup a dashboard as a greeter buffer
+#+begin_src emacs-lisp
+(use-package dashboard
+  :ensure t 
+  :init
+  (setq initial-buffer-choice 'dashboard-open)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-banner-logo-title "Emacs Is More Than A Text Editor!")
+  ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+  (setq dashboard-startup-banner "/home/dt/.config/emacs/images/emacs-dash.png")  ;; use custom image as banner
+  (setq dashboard-center-content nil) ;; set to 't' for centered content
+  (setq dashboard-items '((recents . 10)
+                          (agenda . 5 )
+                          (bookmarks . 3)
+                          ;(projects . 3) ; only available though projectile
+                          (registers . 3)))
+  :custom
+  (dashboard-modify-heading-icons '((recents . "file-text")
+                                    (bookmarks . "book")))
+  :config
+  (dashboard-setup-startup-hook))
+#+end_src
+
+
 * Themes
 
 We install some themes for emacs.
@@ -431,15 +518,14 @@ We set monokai as default because of its clarity and warm usage of pastel colors
 
 #+begin_src emacs-lisp
 (use-package monokai-theme
- :demand t 
- :config
-   (load-theme 'monokai t))
+  :ensure t
+  :config
+    (load-theme 'monokai t))
 #+end_src
 
 #+begin_src emacs-lisp
-  (use-package better-defaults
-		:demand t
-	)
+(use-package better-defaults
+  :ensure t)
 ;; set a default theme
 ;;(use-package  gruvbox-theme
    ;;:config
@@ -452,4 +538,130 @@ Enable current line bar after the theme is loaded
 (hl-line-mode t)
 #+end_src
 
+* Software Development 
+
+** LSP Languange Server Protocol Setup
+
+c++ lsp tutorial
+
+https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
+
+https://github.com/emacs-lsp/lsp-mode/blob/master/docs/tutorials/CPP-guide.md#lsp-mode-configuration
+
+#+begin_src emacs-lisp
+(use-package company
+  :ensure t)
+
+(use-package clang-format
+  :ensure t
+  :after lsp-mode
+)
+
+(use-package lsp-mode
+  :ensure t
+  :after company clang-format yasnippet
+  :config
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+  ;(setq lsp-enable-on-type-formatting nil)
+; todo: these does not set indents to 4...
+  ;;(setq lsp-enable-indentation nil)
+  ;;(setq lsp-enable-on-type-formatting nil)
+
+    (th/leader-keys
+      "a" '(:ignore t :wk "LSP mode commands")
+      "a f" '(clang-format-region :wk "Format region")
+      "a F" '(clang-format-buffer :wk "Format file")
+      "a r" '(lsp-rename :wk "Rename")
+      "a d" '(lsp-describe-thing-at-point :wk "Describe at point")
+      )
+    
+    (th/leader-keys
+      "a s" '(:ignore t :wk "LSP Show")
+      "a s e" '(lsp-treemacs-errors-list :wk "See errors")
+      "a s s" '(lsp-treemacs-symbols :wk "See symbols")
+      )
+  )
+
+(use-package lsp-treemacs
+  :ensure t)
+
+(use-package helm-lsp
+  :ensure t
+  :config
+  (helm-mode)
+  (define-key global-map [remap find-file] #'helm-find-files)
+  (define-key global-map [remap execute-extended-command] #'helm-M-x)
+  (define-key global-map [remap switch-to-buffer] #'helm-mini)
+  )
+
+;(use-package company
+;:ensure t)
+
+(use-package helm-xref
+  :after helm-lsp)
+
+(setq gc-cons-threshold (* 100 1024 1024)
+      read-process-output-max (* 1024 1024)
+      treemacs-space-between-root-nodes nil
+      company-idle-delay 0.0
+      company-minimum-prefix-length 1
+      lsp-idle-delay 0.1)  ;; clangd is fast
+#+end_src
+
+
+** C & C++ formatting
+
+Hooks can be added for auto lsp-mode on file enter, but this can be slow if you just want to inspect a file.
+#+begin_src emacs-lisp
+;(add-hook 'c-mode-hook 'lsp)
+(add-hook 'c++-mode-hook 'lsp)
+#+end_src
+
+Here we specify default formatting for when we are *not* in lsp-mode
+#+begin_src emacs-lisp
+(setq-default c-basic-offset 4
+              tab-width 4
+              indent-tabs-mode t)
+#+end_src
+
+Clangd configuration presets
+#+begin_src emacs-lisp
+(setq th/lsp-clangd-args '("-j=4"
+		                   "--background-index"
+		                   "--compile-commands-dir=build"
+                           "-clang-tidy"
+		                   ;"--completion-style=bundled"
+                           "--completion-style=detailed"
+		                   "--pch-storage=memory"
+		                   "--header-insertion=never"
+		                   "-log=verbose"
+		                   "--header-insertion-decorators=0"))
+
+(defvar th/clang-format-style (concat "{BasedOnStyle: llvm,"
+                                       " IndentWidth: 4,"
+                                       " TabWidth: 4,"
+                                       " PointerAlignment: Left,"
+                                       " }"))
+
+(setq lsp-clients-clangd-args th/lsp-clangd-args)
+(setq clang-format-style th/clang-format-style)
+#+end_src
+
+** Snipptes
+
+we need snippets aswel
+https://wuciawe.github.io/emacs/2014/08/14/emacs-with-yasnippet-and-autocompletion.html
+
+#+begin_src emacs-lisp
+(use-package yasnippet
+    :config
+    (setq yas-snippet-dirs '("~/Dotfiles/emacs/snippets"))
+    (define-key yas-minor-mode-map (kbd "<tab>") nil)
+    (define-key yas-minor-mode-map (kbd "TAB") nil)
+
+    (th/leader-keys
+      "c" '(yas-expand :wk "expand snippet"))
+    (yas-global-mode 1)
+  )
+#+end_src
 
