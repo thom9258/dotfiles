@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: function
+# key: fun
+# --
+std::function<${1:return}(${2:args})> ${3:name}

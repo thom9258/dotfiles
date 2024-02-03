@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: map
+# key: map
+# --
+std::unordered_map<${1:keytype}, ${2:valtype}> ${3:name};

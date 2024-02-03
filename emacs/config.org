@@ -364,7 +364,11 @@ Enable table of content generation:
 (use-package toc-org
   :ensure t
   :commands toc-org-enable
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
+  :config
+   ;;(setq toc-org-max-depth 4)
+   ;;(setq toc-org-hrefify-default 4)
+  :init (add-hook 'org-mode-hook 'toc-org-enable)
+)
 #+end_src
 
 

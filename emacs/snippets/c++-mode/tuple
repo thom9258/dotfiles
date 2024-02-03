@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: tuple
+# key: tuple
+# --
+std::tuple<${1:type1}, ${2:type2}> ${3:name};

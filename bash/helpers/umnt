@@ -1,0 +1,9 @@
+#!/bin/bash
+
+pgrep -x dmenu && exit
+
+MOUNTABLEDRIVES=$(lsblk -lp | grep "/mnt/" | awk '{print $1}') 
+[[ "MOUNTABLEDRIVES" = "" ]] && exit 1
+CHOSEN=$(printf "none\n$MOUNTABLEDRIVES" | dmenu -i -p "mount?" | awk '{print $1}')
+[[ "$CHOSEN" = "" ]] && exit 1 || [[ "$CHOSEN" = "none" ]] && exit 1
+sudo umount $CHOSEN

@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 git clone --depth=1 --single-branch \
 --branch emacs-27 https://github.com/emacs-mirror/emacs.git

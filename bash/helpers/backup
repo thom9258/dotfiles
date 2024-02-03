@@ -1,0 +1,143 @@
+#!/bin/bash
+################################################################################
+#
+# SHORT DESCRIPTION:
+#   Backup files.
+#
+# ORIGINAL AUTHOR:
+#   Thomas Alexgaard Jensen
+#
+# LICENSE:
+#   This is free and unencumbered software released into the public domain.
+#
+#   Anyone is free to copy, modify, publish, use, compile, sell, or
+#   distribute this software, either in source code form or as a compiled
+#   binary, for any purpose, commercial or non-commercial, and by any
+#   means.
+#
+#   In jurisdictions that recognize copyright laws, the author or authors
+#   of this software dedicate any and all copyright interest in the
+#   software to the public domain. We make this dedication for the benefit
+#   of the public at large and to the detriment of our heirs and
+#   successors. We intend this dedication to be an overt act of
+#   relinquishment in perpetuity of all present and future rights to this
+#   software under copyright law.
+#
+#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+#   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+#   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+#   IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+#   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+#   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#   OTHER DEALINGS IN THE SOFTWARE.
+#
+#   For more information, please refer to <http://unlicense.org/>
+#
+################################################################################
+
+function help 
+{
+echo "
+LICENSE:
+	This is free and unencumbered software released into the public domain.
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+	Anyone is free to copy, modify, publish, use, compile, sell, or
+	distribute this software, either in source code form or as a compiled
+	binary, for any purpose, commercial or non-commercial, and by any
+	means.
+	For more information, please refer to <http://unlicense.org/>
+
+INTRODUCTION:
+Backup files. 
+Complete backup manager with NO automatic, dublicate or excess backup removal.
+Files marked with (((FORCE_NO_BACKUP))) signature are excluded from the backup
+process.
+
+HOW-TO USE:
+backup <FILE1> <FILE2> <FILEn>
+
+WARNING:     
+This script is a trade of **space for security**. 
+Repeated backup of large files take a lot of space.
+Manual sorting of backups is adviced.
+
+OPTS:
+-h            HELP,  shows this help message.
+-v            VOCAL, prints out backup file name and backup directory.
+-f            FORCE, force backup. Even if force no backup mark exists. See (1).
+-n            NO,    no backup. Run code without creating a backup file
+-l            LIST,  list backup directory. See (2).
+
+(1) Make sure some files cannot have a backup, insert the mark (((FORCE_NO_BACKUP))) 
+    anywhere in the file you want to no backup.
+
+(2) Having a LOT of files in your backup directory will fill your terminal with a lot 
+    of useless old backups, therefore the | tail is added to only print the last 
+    10 files.
+
+.VIMRC / INIT.VIM IMPLEMENTATION:
+    Add one of these lines to your init.vim or .vimrc to enable automatic backups:
+
+\"Auto backup on bufwrite (when you save your buffer):
+autocmd BufWritePost * !backup -v <afile>
+
+\"Backup bound to a mapping:
+nnoremap <LEADER>b :!backup %
+"
+}
+
+# Check for input
+(( ! $# )) && echo "No argument supplied!" && help && exit 1
+
+# Variables
+BACKUPDIR="$HOME/Backup/"
+DEBUG=0
+NO_BACKUP=0
+FORCE_BACKUP=0
+NO_BACKUP_SIGNATURE="(((FORCE_NO_BACKUP)))"
+# file names that shouldent cause a backup unless -f is used.
+IGNORE_FILENAMES=("compile_commands.json" "Makefile")
+
+# Check if backup directory exists
+[[ ! -d "$BACKUPDIR" ]] && echo "backup directory does not exist! Create <$BACKUPDIR> or change variable to existing backup directory." && exit 1
+
+# Manage opts
+while getopts "hvnfl" opt
+do
+    case ${opt} in
+        h  ) help && exit 0 ;;
+        v  ) DEBUG=1 && shift $((OPTIND-1)) ;;
+        n  ) echo "Forced no backup!" && NO_BACKUP=1 && shift $((OPTIND-1)) ;;
+        f  ) echo "Forced backup!" && FORCE_BACKUP=1 && shift $((OPTIND-1)) ;;
+        l  ) echo "last 10 files:" && echo "size: $(du -ksh $BACKUPDIR 2>/dev/null)" && ls --group-directories-first --color=always "$BACKUPDIR" | tail && shift $((OPTIND-1)) ;;
+        \? ) echo "Argument not understood." && help && exit 1 ;;
+    esac
+done
+
+# manage input files
+for FILE in "$@"
+do
+    # Check if file exists
+    [[ ! -f "$FILE" ]] && echo "$FILE is not a file!" && continue
+
+    # Check if the current file is contained in the ignore filename list
+    for FILENAME in "${IGNORE_FILENAMES[@]}"
+    do
+        [[ "$FILE" == "$FILENAME" ]] && echo "$FILENAME is set to be ignored." && continue 2
+    done
+
+    # Check for force no backup signature in file and exit
+    (( ! "$FORCE_BACKUP" )) && grep -q "$NO_BACKUP_SIGNATURE" < "$FILE" &&  echo "Forced no backup because (((FORCE_NO_BACKUP))) mark exists in file $FILE" && continue
+
+    # Create pathname for the backup file
+    PATHNAME=$(tr "/" "%" <<< $(realpath "$FILE")) 
+    DATE=$(date +%Y-%m-%d.%H:%M:%S)
+    BACKUPNAME="$DATE-$PATHNAME"
+
+    # Make sure the backup file isn't executable and move it to backup dir
+    cp "$FILE" "$BACKUPNAME"
+    chmod -x "$BACKUPNAME"
+    mv "$BACKUPNAME" "$BACKUPDIR."
+    (( $DEBUG )) && echo "Created file:" && echo "$BACKUPDIR$BACKUPNAME"
+    done
+exit 0

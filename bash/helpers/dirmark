@@ -1,0 +1,99 @@
+#!/bin/bash
+################################################################################
+#
+# SHORT DESCRIPTION:
+#   Bookmark for Directories.
+#
+# ORIGINAL AUTHOR:
+#   Thomas Alexgaard Jensen
+#
+# LICENSE:
+#   This is free and unencumbered software released into the public domain.
+#
+#   Anyone is free to copy, modify, publish, use, compile, sell, or
+#   distribute this software, either in source code form or as a compiled
+#   binary, for any purpose, commercial or non-commercial, and by any
+#   means.
+#
+#   In jurisdictions that recognize copyright laws, the author or authors
+#   of this software dedicate any and all copyright interest in the
+#   software to the public domain. We make this dedication for the benefit
+#   of the public at large and to the detriment of our heirs and
+#   successors. We intend this dedication to be an overt act of
+#   relinquishment in perpetuity of all present and future rights to this
+#   software under copyright law.
+#
+#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+#   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+#   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+#   IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+#   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+#   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#   OTHER DEALINGS IN THE SOFTWARE.
+#
+#   For more information, please refer to <http://unlicense.org/>
+#
+################################################################################
+
+function help 
+{
+echo "
+LICENSE:
+    This is free and unencumbered software released into the public domain.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+    Anyone is free to copy, modify, publish, use, compile, sell, or
+    distribute this software, either in source code form or as a compiled
+    binary, for any purpose, commercial or non-commercial, and by any
+    means.
+    For more information, please refer to <http://unlicense.org/>
+
+INTRODUCTION:
+Bookmark for directories.
+Mark and list a directory.
+
+HOW-TO USE:
+Mark directory: <dirmark -m>
+List marked directory: <dirmark>
+Go to marked directory: <cd \$(dirmark)>
+
+OPTS:
+-h      Show this help message.
+-m      Mark current directory.
+-i      Get info about mark and mark file.
+
+Recommended .bashrc setup:
+	alias mark='dirmark -m'
+	alias jmp='cd \$(dirmark)'
+	alias listmark='dirmark -i'
+"
+}
+
+MARK="$HOME/.dirmark"
+
+function mark 
+{
+	[[ ! -f $MARK ]] && touch $MARK 
+	echo $(pwd) > $MARK && echo "marked <$(pwd)>"
+}
+
+function listmark
+{
+	[[ -f $MARK ]] && cat $MARK || help
+}
+
+function getinfo
+{
+	[[ -f $MARK ]] && echo "dirmark file: $MARK" && echo "Current mark: $(cat $MARK)"
+}
+
+# Manage opts
+while getopts "hmi" opt
+do
+	case ${opt} in
+		h  ) help    && exit 0 ;;
+		m  ) mark    && exit 0 ;;
+		i  ) getinfo && exit 0 ;;
+		\? ) echo "Argument <${opt}> not understood" && help && exit 1 ;;
+	esac
+done
+listmark
