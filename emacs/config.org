@@ -24,6 +24,7 @@
   - [[#dashboard-greeter][Dashboard Greeter]]
 - [[#themes][Themes]]
 - [[#software-development][Software Development]]
+  - [[#magit][Magit]]
   - [[#lsp-languange-server-protocol-setup][LSP Languange Server Protocol Setup]]
   - [[#c--c-formatting][C & C++ formatting]]
   - [[#snipptes][Snipptes]]
@@ -544,6 +545,13 @@ Enable current line bar after the theme is loaded
 
 * Software Development 
 
+** Magit
+
+
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** LSP Languange Server Protocol Setup
 
 c++ lsp tutorial
@@ -615,12 +623,6 @@ https://github.com/emacs-lsp/lsp-mode/blob/master/docs/tutorials/CPP-guide.md#ls
 
 ** C & C++ formatting
 
-Hooks can be added for auto lsp-mode on file enter, but this can be slow if you just want to inspect a file.
-#+begin_src emacs-lisp
-;(add-hook 'c-mode-hook 'lsp)
-(add-hook 'c++-mode-hook 'lsp)
-#+end_src
-
 Here we specify default formatting for when we are *not* in lsp-mode
 #+begin_src emacs-lisp
 (setq-default c-basic-offset 4
@@ -628,8 +630,92 @@ Here we specify default formatting for when we are *not* in lsp-mode
               indent-tabs-mode t)
 #+end_src
 
-Clangd configuration presets
+*** Rtags
+
+[[https://github.com/Andersbakken/rtags][Rtags Source]]
+http://www.mycpu.org/emacs-rtags-helm/
+
+To compile rtags:
+
+#+begin_src sh
+# install llvm
+wget --no-check-certificate -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+sudo add-apt-repository 'deb http://apt.llvm.org/bionic/   llvm-toolchain-bionic-10  main'
+sudo apt update
+sudo apt install llvm
+
+# install clang
+sudo apt install clangd
+sudo apt install libclang-dev
+
+# build rtags
+git clone --recursive https://github.com/Andersbakken/rtags.git
+cd rtags
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .
+make
+#+end_src
+
+
 #+begin_src emacs-lisp
+(use-package company
+  :ensure t
+)
+
+(use-package helm
+  :ensure t
+)
+
+
+(use-package rtags
+  :ensure t
+  :hook (c++-mode . rtags-start-process-unless-running)
+  :config (setq rtags-completions-enabled t
+	            rtags-path "/home/th/.emacs.d/rtags/bin"
+	            rtags-rc-binary-name "rc"
+	            rtags-rdm-binary-name "rdm"
+	            ;;rtags-rc-binary-name "/home/th/.emacs.d/rtags/bin/rc"
+	            ;;rtags-rdm-binary-name "~/.emacs.d/rtags/bin/rdm"
+	            )
+)
+(use-package company-rtags
+  :ensure t
+  :config
+  (progn
+    (setq rtags-autostart-diagnostics t)
+    (rtags-diagnostics)
+    (setq rtags-completions-enabled t)
+    (push 'company-rtags company-backends)
+))
+
+
+(setq rtags-display-result-backend 'helm)
+
+(th/leader-keys ; Buffer management
+  "r"   '(:ignore t :wk "rtags")
+  "r ." '(rtags-find-symbol-at-point :wk "find symbol at cursor")
+  "r ?" '(rtags-find-symbol-at-point :wk "find symbol in project")
+  "r b" '(rtags-location-stack-back :wk "go back to previous location")
+)
+
+(setq rtags-autostart-diagnostics t)
+(rtags-diagnostics)
+(setq rtags-completions-enabled t)
+(push 'company-rtags company-backends)
+(global-company-mode)
+
+
+
+#+end_src
+
+
+Hooks can be added for auto lsp-mode on file enter, but this can be slow if you just want to inspect a file.
+#.+begin_src emacs-lisp
+;(add-hook 'c-mode-hook 'lsp)
+(add-hook 'c++-mode-hook 'lsp)
+#+end_src
+
+Clangd configuration presets
+#.+begin_src emacs-lisp
 (setq th/lsp-clangd-args '("-j=4"
 		                   "--background-index"
 		                   "--compile-commands-dir=build"
@@ -656,7 +742,7 @@ Clangd configuration presets
 we need snippets aswel
 https://wuciawe.github.io/emacs/2014/08/14/emacs-with-yasnippet-and-autocompletion.html
 
-#+begin_src emacs-lisp
+#.+begin_src emacs-lisp
 (use-package yasnippet
     :config
     (setq yas-snippet-dirs '("~/Dotfiles/emacs/snippets"))
