@@ -25,9 +25,9 @@
 - [[#themes][Themes]]
 - [[#software-development][Software Development]]
   - [[#magit][Magit]]
-  - [[#lsp-languange-server-protocol-setup][LSP Languange Server Protocol Setup]]
-  - [[#c--c-formatting][C & C++ formatting]]
-  - [[#snipptes][Snipptes]]
+- [[#c--c-intellisense][C & C++ Intellisense]]
+  - [[#company-complete-anything][Company (COMplete ANYthing)]]
+  - [[#rtags][Rtags]]
 
 * Config example stuff
 
@@ -552,76 +552,7 @@ Enable current line bar after the theme is loaded
 
 #+end_src
 
-** LSP Languange Server Protocol Setup
-
-c++ lsp tutorial
-
-https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
-
-https://github.com/emacs-lsp/lsp-mode/blob/master/docs/tutorials/CPP-guide.md#lsp-mode-configuration
-
-#+begin_src emacs-lisp
-(use-package company
-  :ensure t)
-
-(use-package clang-format
-  :ensure t
-  :after lsp-mode
-)
-
-(use-package lsp-mode
-  :ensure t
-  :after company clang-format yasnippet
-  :config
-  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
-  ;(setq lsp-enable-on-type-formatting nil)
-; todo: these does not set indents to 4...
-  ;;(setq lsp-enable-indentation nil)
-  ;;(setq lsp-enable-on-type-formatting nil)
-
-    (th/leader-keys
-      "a" '(:ignore t :wk "LSP mode commands")
-      "a f" '(clang-format-region :wk "Format region")
-      "a F" '(clang-format-buffer :wk "Format file")
-      "a r" '(lsp-rename :wk "Rename")
-      "a d" '(lsp-describe-thing-at-point :wk "Describe at point")
-      )
-    
-    (th/leader-keys
-      "a s" '(:ignore t :wk "LSP Show")
-      "a s e" '(lsp-treemacs-errors-list :wk "See errors")
-      "a s s" '(lsp-treemacs-symbols :wk "See symbols")
-      )
-  )
-
-(use-package lsp-treemacs
-  :ensure t)
-
-(use-package helm-lsp
-  :ensure t
-  :config
-  (helm-mode)
-  (define-key global-map [remap find-file] #'helm-find-files)
-  (define-key global-map [remap execute-extended-command] #'helm-M-x)
-  (define-key global-map [remap switch-to-buffer] #'helm-mini)
-  )
-
-;(use-package company
-;:ensure t)
-
-(use-package helm-xref
-  :after helm-lsp)
-
-(setq gc-cons-threshold (* 100 1024 1024)
-      read-process-output-max (* 1024 1024)
-      treemacs-space-between-root-nodes nil
-      company-idle-delay 0.0
-      company-minimum-prefix-length 1
-      lsp-idle-delay 0.1)  ;; clangd is fast
-#+end_src
-
-
-** C & C++ formatting
+* C & C++ Intellisense
 
 Here we specify default formatting for when we are *not* in lsp-mode
 #+begin_src emacs-lisp
@@ -630,12 +561,35 @@ Here we specify default formatting for when we are *not* in lsp-mode
               indent-tabs-mode t)
 #+end_src
 
-*** Rtags
+
+** Company (COMplete ANYthing)
+
+We need a completion frontend for our completion and intellisense engine.
+
+#+begin_src emacs-lisp
+(use-package company
+  :ensure t
+  :config
+    (th/leader-keys
+      "c"   '(:ignore t :wk "company (COMplete ANYthing)")
+      "c p" '(company-select-previous :wk "select previous")
+      "c n" '(company-select-next :wk "select next"))
+  :config
+  (setq company-idle-delay 0.3)
+  (global-company-mode t)
+)
+#+end_src
+
+** Rtags
+
+Rtags is a compile_commands based project indexer. Together with company this creates a rather minimalistic and seamless intellisense experience.
+
+In order to use, ensure that the 
 
 [[https://github.com/Andersbakken/rtags][Rtags Source]]
 http://www.mycpu.org/emacs-rtags-helm/
 
-To compile rtags:
+*** Compile
 
 #+begin_src sh
 # install llvm
@@ -655,103 +609,53 @@ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .
 make
 #+end_src
 
+*** How to Use
+
+Rtags requires a compile_commands.json to be able to index.
+
+Optionally add the bin folder of rtags to path to make life easier. Add this to your .bashrc
+#+begin_src bash
+PATH=$PATH:$HOME/.emacs.d/rtags/bin
+#+end_src
+
+First, start the rdm process, this should be setup to start automatically in the config already.
+#+begin_src sh
+./~/.emacs.d/rtags/bin/rdm &
+#+end_src
+
+Then, after generating a compile_commands file, invoke the rc command in order to index the project.
+#+begin_src sh
+rc -J <path>
+#+end_src
+
+
+*** Setup
 
 #+begin_src emacs-lisp
-(use-package company
-  :ensure t
-)
-
-(use-package helm
-  :ensure t
-)
-
-
 (use-package rtags
   :ensure t
   :hook (c++-mode . rtags-start-process-unless-running)
+        (c-mode-hook . rtags-start-process-unless-running)
   :config (setq rtags-completions-enabled t
 	            rtags-path "/home/th/.emacs.d/rtags/bin"
 	            rtags-rc-binary-name "rc"
-	            rtags-rdm-binary-name "rdm"
-	            ;;rtags-rc-binary-name "/home/th/.emacs.d/rtags/bin/rc"
-	            ;;rtags-rdm-binary-name "~/.emacs.d/rtags/bin/rdm"
-	            )
+	            rtags-rdm-binary-name "rdm")
 )
+
 (use-package company-rtags
   :ensure t
   :config
-  (progn
+  (th/leader-keys
+    "r"   '(:ignore t :wk "rtags the c++ intellisense engine")
+    "r ." '(rtags-find-symbol-at-point :wk "find symbol at cursor")
+    "r ?" '(rtags-find-symbol :wk "find symbol in project")
+    "r f" '(rtags-find-file :wk "find file")
+    "r d" '(rtags-find-dead-functions :wk "list dead functions")
+    "r p" '(rtags-location-stack-back :wk "go to previous location")
+    "r n" '(rtags-location-stack-forward :wk "go to next location"))
     (setq rtags-autostart-diagnostics t)
     (rtags-diagnostics)
     (setq rtags-completions-enabled t)
     (push 'company-rtags company-backends)
-))
-
-
-(setq rtags-display-result-backend 'helm)
-
-(th/leader-keys ; Buffer management
-  "r"   '(:ignore t :wk "rtags")
-  "r ." '(rtags-find-symbol-at-point :wk "find symbol at cursor")
-  "r ?" '(rtags-find-symbol-at-point :wk "find symbol in project")
-  "r b" '(rtags-location-stack-back :wk "go back to previous location")
 )
-
-(setq rtags-autostart-diagnostics t)
-(rtags-diagnostics)
-(setq rtags-completions-enabled t)
-(push 'company-rtags company-backends)
-(global-company-mode)
-
-
-
 #+end_src
-
-
-Hooks can be added for auto lsp-mode on file enter, but this can be slow if you just want to inspect a file.
-#.+begin_src emacs-lisp
-;(add-hook 'c-mode-hook 'lsp)
-(add-hook 'c++-mode-hook 'lsp)
-#+end_src
-
-Clangd configuration presets
-#.+begin_src emacs-lisp
-(setq th/lsp-clangd-args '("-j=4"
-		                   "--background-index"
-		                   "--compile-commands-dir=build"
-                           "-clang-tidy"
-		                   ;"--completion-style=bundled"
-                           "--completion-style=detailed"
-		                   "--pch-storage=memory"
-		                   "--header-insertion=never"
-		                   "-log=verbose"
-		                   "--header-insertion-decorators=0"))
-
-(defvar th/clang-format-style (concat "{BasedOnStyle: llvm,"
-                                       " IndentWidth: 4,"
-                                       " TabWidth: 4,"
-                                       " PointerAlignment: Left,"
-                                       " }"))
-
-(setq lsp-clients-clangd-args th/lsp-clangd-args)
-(setq clang-format-style th/clang-format-style)
-#+end_src
-
-** Snipptes
-
-we need snippets aswel
-https://wuciawe.github.io/emacs/2014/08/14/emacs-with-yasnippet-and-autocompletion.html
-
-#.+begin_src emacs-lisp
-(use-package yasnippet
-    :config
-    (setq yas-snippet-dirs '("~/Dotfiles/emacs/snippets"))
-    (define-key yas-minor-mode-map (kbd "<tab>") nil)
-    (define-key yas-minor-mode-map (kbd "TAB") nil)
-
-    (th/leader-keys
-      "c" '(yas-expand :wk "expand snippet"))
-    (yas-global-mode 1)
-  )
-#+end_src
-
