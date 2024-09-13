@@ -43,8 +43,8 @@ let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
 
 set noswapfile
 " use external backup script on save 
-set nobackup
-autocmd BufWritePost * !backup <afile>
+"set nobackup
+"autocmd BufWritePost * !backup <afile>
 " create a undo directory
 set undodir=~/.nvim/undodir
 set undofile
@@ -76,13 +76,6 @@ set statusline+=\ (%p%%)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " FUNCTIONS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-function! Focus()
-    set nonumber
-    set norelativenumber
-    set laststatus=0
-endfunction
-
 function! TerminalSpawnBelow()
     new
     set norelativenumber
@@ -326,3 +319,5 @@ autocmd FileType cpp,c,hpp inoremap <buffer> ;com /**/<ESC>hi
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " COLORSCHEME
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+colorscheme elflord

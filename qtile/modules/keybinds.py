@@ -3,7 +3,7 @@ from libqtile.config import Click, Drag, Group, Key
 from libqtile.lazy import lazy
 
 mod        = "mod4"
-terminal   = "kitty"
+terminal   = "gnome-terminal"
 browser    = "firefox"
 menu       = "dmenu_run"
 editor     = "emacsclient -c"

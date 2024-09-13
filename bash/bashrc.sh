@@ -89,6 +89,8 @@ fi
 
 PATH=$PATH:$HOME/Dotfiles/bash/helpers
 PATH=$PATH:$HOME/Dotfiles/bash/helpers/term-dmenu
+PATH=$PATH:$HOME/Downloads/renderdoc_1.33/bin
+PATH=$PATH:$HOME/.emacs.d/rtags/bin
 
 # ===========================================================================
 # Editor controls
@@ -200,6 +202,8 @@ alias ros1source='source /opt/ros/noetic/setup.bash && source ~/ros1_catkin_ws/d
 alias coppeliasim='cd /home/th/Libraries/CoppeliaSim/ ; ./coppeliaSim.sh'
 alias cdros2hand='cd ~/ros2_colcon_ws/src/th_hand_controller/th_hand_controller/'
 
+alias simplerenderer='cd ~/Projects/ArcFramework/dev-tests/simple-renderer/'
+
 # Security
 alias purge='shred -fvuz'
 alias tarenc='tar -zcvf'
@@ -231,11 +235,3 @@ PS1='[\j]\[\033[1;32m\]\w >\[\033[00m\] '
 
 # Import ssh keys (Unsafe i guess)
 ssh-add "$HOME/.ssh/id_github" ; clear
-
-# Fix matlab rendering
-export _JAVA_AWT_WM_NONREPARENTING=1
-
-# Setup gazebo enviroment
-export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/model_editor_models/
-
-[ -f "/home/th/.ghcup/env" ] && source "/home/th/.ghcup/env" # ghcup-env

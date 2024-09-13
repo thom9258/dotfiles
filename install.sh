@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#DOT_DIR="$(pwd)"
-DOT_DIR="$HOME/Dotfiles"
+DOT_DIR="$(pwd)"
+#DOT_DIR="$HOME/dotfiles"
 
 echo "Installing Dotfiles from dir \"$DOT_DIR\""
 
