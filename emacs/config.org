@@ -4,7 +4,10 @@
 #+OPTIONS: toc:2
 
 * Table of Contents :toc:
-- [[#config-example-stuff][Config example stuff]]
+- [[#if-you-cannot-install-magit-or-downloading-packages-complains-about-missing-public-key][If You Cannot Install Magit or Downloading Packages Complains about Missing Public Key]]
+  - [[#you-can-try-to-get-the-public-key-manually][You can Try to Get the Public Key Manually]]
+  - [[#install-packages-without-signature][Install packages without signature]]
+- [[#config-example-references][Config Example References]]
 - [[#server-management][Server management]]
 - [[#startup-basics][Startup Basics]]
   - [[#visual-interface-tweaks][Visual Interface Tweaks]]
@@ -12,7 +15,6 @@
   - [[#custom-behaviour][Custom behaviour]]
 - [[#evil-config][Evil Config]]
 - [[#general-keybind-manager][General Keybind Manager]]
-  - [[#general-keybinds][General Keybinds]]
 - [[#org-note-taking][Org Note Taking]]
   - [[#org-roam-zettlekasten][Org Roam Zettlekasten]]
 - [[#which-key][Which Key]]
@@ -27,7 +29,28 @@
   - [[#company-complete-anything][Company (COMplete ANYthing)]]
   - [[#rtags][Rtags]]
 
-* Config example stuff
+* If You Cannot Install Magit or Downloading Packages Complains about Missing Public Key
+  
+** You can Try to Get the Public Key Manually
+
+In a terminal:
+#+begin_src bash
+gpg --homedir ~/.emacs.d/elpa/gnupg      \
+    --keyserver hkp://keys.openpgp.org  \
+    --receive-keys 066DAFCB81E42C40 
+#+end_src
+
+** Install packages without signature
+  
+eval:
+#+begin_src emacs-lisp
+(setq package-set-signature nil)
+(package-refresh-contents)
+#+end_src
+
+Then manually do M-x package-install and install 'gnu-elpa-keyring-update'
+
+* Config Example References
 
 DistroTube Emacs (GOING THROUGH THIS NOW):
 https://gitlab.com/dwt1/configuring-emacs
@@ -250,6 +273,10 @@ But even vim lacks some movement features that we would like... So we setup some
       "k" '(evil-window-up :wk "Go to upper window")
       "l" '(evil-window-right :wk "Go to right window"))
 
+	;; TODO:
+	;; (define-key evil-normal-state-map (kbd "J") "10j")
+	;; (define-key evil-normal-state-map (kbd "K") "10k")
+
     (th/leader-keys ; elisp evaluation
       "e" '(:ignore t :wk "Evaluate elisp")
       "e b" '(eval-buffer :wk "Evaluate buffer")
@@ -285,12 +312,7 @@ But even vim lacks some movement features that we would like... So we setup some
 )
 #+end_src
 
-** General Keybinds
-
 #+begin_src emacs-lisp
-  ;; TODO: port these too..
-;; (define-key evil-normal-state-map (kbd "J") "10j")
-;; (define-key evil-normal-state-map (kbd "K") "10k")
 #+end_src
 
 * Org Note Taking
