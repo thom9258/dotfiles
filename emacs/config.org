@@ -6,8 +6,6 @@
 * Table of Contents :toc:
 - [[#config-example-stuff][Config example stuff]]
 - [[#server-management][Server management]]
-- [[#elpaca-package-manager][Elpaca Package Manager]]
-  - [[#enable-use-package-support][Enable use-package support]]
 - [[#startup-basics][Startup Basics]]
   - [[#visual-interface-tweaks][Visual Interface Tweaks]]
   - [[#text-zoom-inout][Text Zoom in/out]]
@@ -70,70 +68,6 @@ We need to be able to stop the server for a proper reset. This is smart if emacs
   (interactive)
   (org-babel-load-file (expand-file-name "config.org" user-emacs-directory)))
 #+end_src
-
-* Elpaca Package Manager
-
-#+begin_src emacs-lisp
-(defvar elpaca-installer-version 0.5)
-(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil
-                              :files (:defaults (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-       (build (expand-file-name "elpaca/" elpaca-builds-directory))
-       (order (cdr elpaca-order))
-       (default-directory repo))
-  (add-to-list 'load-path (if (file-exists-p build) build repo))
-  (unless (file-exists-p repo)
-    (make-directory repo t)
-    (when (< emacs-major-version 28) (require 'subr-x))
-    (condition-case-unless-debug err
-        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (call-process "git" nil buffer t "clone"
-                                       (plist-get order :repo) repo)))
-                 ((zerop (call-process "git" nil buffer t "checkout"
-                                       (or (plist-get order :ref) "--"))))
-                 (emacs (concat invocation-directory invocation-name))
-                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                 ((require 'elpaca))
-                 ((elpaca-generate-autoloads "elpaca" repo)))
-            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-          (error "%s" (with-current-buffer buffer (buffer-string))))
-      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-  (unless (require 'elpaca-autoloads nil t)
-    (require 'elpaca)
-    (elpaca-generate-autoloads "elpaca" repo)
-    (load "./elpaca-autoloads")))
-(add-hook 'after-init-hook #'elpaca-process-queues)
-(elpaca `(,@elpaca-order))
-#+end_src
-
-** Enable use-package support
-
-#+begin_src emacs-lisp
-;; Install use-package support
-(elpaca elpaca-use-package
-  ;; Enable :elpaca use-package keyword.
-  (elpaca-use-package-mode)
-  ;; Assume :elpaca t unless otherwise specified.
-  (setq elpaca-use-package-by-default t))
-
-;; Block until current queue processed.
-(elpaca-wait)
-
-;;Turns off elpaca-use-package-mode current declartion
-;;Note this will cause the declaration to be interpreted immediately (not deferred).
-;;Useful for configuring built-in emacs features.
-(use-package emacs :elpaca nil :config (setq ring-bell-function #'ignore))
-
-;; Don't install anything. Defer execution of BODY
-;;(elpaca nil (message "deferred"))
-#+end_src
-
 
 * Startup Basics
 
@@ -248,36 +182,39 @@ But behold, lets bastardize our creation with proper editing herecy!
 We install evil vim as our default editing mode.
 
 #+begin_src emacs-lisp
-	;; Better undo compatability
-(use-package undo-fu
-  :ensure t)
-	;; Proper editing
-(use-package evil
-  :ensure t
-  ;; tweak evil's configuration before loading it
-  :init      
-  ;; This is optional since it's already set to t by default.
-  (setq evil-want-integration t) 
-  (setq evil-want-keybinding nil)
-  (setq evil-vsplit-window-right t)
-  (setq evil-split-window-below t)
-  :config
-  (evil-mode)
-  (setq evil-search-module 'evil-search)
-  ;; no vim insert bindings
-  (setq evil-undo-system 'undo-fu))
+        ;; Better undo compatability
+    (use-package undo-fu
+      :ensure t)
+        ;; Proper editing
+    (use-package evil
+      :ensure t
+      :after undo-fu
+      ;; tweak evil's configuration before loading it
+      :init      
+          (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+          (setq evil-want-keybinding nil)
+          (setq evil-vsplit-window-right t)
+          (setq evil-split-window-below t)
+      :config
+         (evil-mode)
+         (setq evil-search-module 'evil-search)
+         ;; no vim insert bindings
+         (setq evil-undo-system 'undo-fu)
+  )
 
-	;; Editing but for lots of modes
-(use-package evil-collection
-  :ensure t
-  :after evil
-  :config
-  (setq evil-collection-mode-list '(dashboard dired ibuffer))
-  (setq evil-want-keybinding nil)
-  (evil-collection-init))
+        ;; Editing but for lots of modes
+    (use-package evil-collection
+      :ensure t
+      :init
+          (evil-collection-init)
+      :after (evil)
+      :config
+          (setq evil-collection-mode-list '(dashboard dired ibuffer magit))
+          (setq evil-want-keybinding nil)
+    )
 
-(use-package evil-tutor
-  :ensure t)
+    ;;(use-package evil-tutor
+    ;;  :ensure t)
 #+end_src
 
 Vim needs a leader key, this makes bindings easier to reconfigure if a new leader key is defined in the future. Evil vim does not know this notion, so we define it ourselves. 
@@ -377,7 +314,7 @@ Enable table of content generation:
 
 We need a way to manage files, documents and notes on a lot of stuff.
 This could be seperate from emacs but lets try experimenting with org mode, a zettlekasten method of keeping a notebook full of notes that may, or may not have correlations, and lets you easily navigate notes. 
-#+begin_src emacs-lisp
+#.+begin_src emacs-lisp
 (setq org-src-preserve-indentation t)
 (use-package org-roam
   :ensure t
@@ -406,7 +343,7 @@ This could be seperate from emacs but lets try experimenting with org mode, a ze
 #+end_src
 
 We want a efficient way of searching in our roam notebook
-#+begin_src emacs-lisp
+#.+begin_src emacs-lisp
 (use-package deadgrep
   :ensure t
   :after org-roam
@@ -419,7 +356,7 @@ We want a efficient way of searching in our roam notebook
 #+end_src
 
 We also want a cool notebook visualizer
-#+begin_src emacs-lisp
+#.+begin_src emacs-lisp
 (use-package org-roam-ui
   :ensure t
   :after org-roam
@@ -472,6 +409,7 @@ Force edit files
 
 (use-package all-the-icons-dired
   :ensure t
+  :after (all-the-icons dired)
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode j))))
 #+end_src
 
@@ -547,9 +485,15 @@ Enable current line bar after the theme is loaded
 
 ** Magit
 
-
 #+begin_src emacs-lisp
-
+(use-package magit
+    :after (general magit-section with-editor)
+    :ensure t
+    :config
+        (th/leader-keys ; Magit Helpers
+          "g"   '(:ignore t :wk "Magit")
+          "g g" '(magit-status :wk "Get into Magit buffer for Current Project")
+          ))
 #+end_src
 
 * C & C++ Intellisense
